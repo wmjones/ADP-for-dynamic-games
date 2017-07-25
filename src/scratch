@@ -1,0 +1,273 @@
+//        double *state;
+//        state = new double [2];
+//        vector<double> x_u(2);
+//        x_u[0] = 100; x_u[1] = 100;
+//        opt.set_upper_bounds(x_u);
+//        policy[i] = 0;
+//        value[i] = state[0]*state[1];
+//        policy[i] = state[0] + state[1];
+//        value[i] = sin(state[0])+sin(state[1]);
+//        double state_test[2] = {10.1669231, 1.6470239};
+//        vector<double> actions_test(2);
+//        vector<double> grad_test(2);
+//        actions_test[0] = 6.625;
+//        actions_test[1] = 2.0625;
+//        objective_data data_test = {state_test};
+//        double a1 = objective_qual(actions_test, grad_test, &data_test);
+//        printf("%f", a1);
+//        if((abs(state[0]-1.011649)<.05 && abs(state[1]-1.011649)<.05)){
+//            printf("(Pobs , Iobs  , Vobs ) = (%.8f, %.8f, %.8f)\n", action[0], action[1], -minf);
+//        }
+//        delete[] state;
+
+
+//void bellman_nlopt(double **xy_knots, double *value, double *policy, double *dvalue0, double *dvalue1, size_t nmax){
+////#pragma omp parallel for
+//    for(size_t i=0; i<S; i++){
+//        double state[d];
+//        state[0] = xy_knots[i][0]; state[1] = xy_knots[i][1];
+//        objective_data data_init = {state};
+//        nlopt::opt opt(nlopt::LD_LBFGS, 1);
+//        //opt.set_maxtime(2.0);
+//        opt.set_xtol_rel(1e-5);
+//        vector<double> x_l(1);
+//        x_l[0] = 0;
+//        vector<double> x_u(1);
+//        x_u[0] = 100;
+//        opt.set_lower_bounds(x_l);
+//        opt.set_upper_bounds(x_u);
+//        opt.set_vector_storage(0);
+//        opt.set_min_objective(objective_nlopt, &data_init);
+//        vector<double> action(1);
+//        action[0] = 1.0;
+//        double minf;
+//        nlopt::result result = opt.optimize(action, minf);
+//        value[i] = -minf;
+//        policy[i] = action[0];
+//        if(result == 6 || (test && nmax==1)){
+//            value[i] = V_hat(state, value_coef, alpha_value_coef, num_of_value_coef);
+//            policy[i] = V_hat(state, policy_coef, alpha_policy_coef, num_of_policy_coef);
+//            printf("state=(%f, %f), k=%zd\n", state[0], state[1], nmax);
+//            double *action_nlopt;
+//            action_nlopt = new double[1];
+//            action_nlopt[0] = action[0];
+//            printf("\n");
+//            printf("state\n");
+//            print_vec(state, 2);
+//            printf("action\n");
+//            print_vec(action_nlopt, 1);
+//            double a1 = V_hat(state, policy_coef, alpha_policy_coef, num_of_policy_coef);
+//            printf("other action\n");
+//            printf("%.8f\n", a1);
+//            printf("value\n%f\n", value[i]);
+//            double delta = 1e-5;
+//            double action_lower[1] = {action_nlopt[0] - delta};
+//            double action_mid[1] = {action_nlopt[0]};
+//            double action_higher[1] = {action_nlopt[0] + delta};
+//            double test1 = objective(state, action_nlopt);
+//            double f_lower = objective(state, action_lower);
+//            double f_mid = objective(state, action_mid);
+//            double f_higher = objective(state, action_higher);
+//            double d_approx = (f_higher - f_mid)/delta + (f_mid - f_lower)/delta;
+//            double d_test1 = D_objective_d_p0(state, action_mid);
+//            printf("objective = %f, derivative = %.8f, d_approx = %.8f\n", test1, d_test1, d_approx/2.0);
+//            //            double state_test[2] = {0, 0};
+//            //            double action_test[1] = {.328698};
+//            //            double test2 = objective(state_test, action_test);
+//            //            double d_test2 = D_objective_d_p0(state_test, action_test);
+//            //            printf("They should be objective = %f, derivative = %f\n", test2, d_test2);
+//            delete[] action_nlopt;
+//        }
+//        // double other = objective(action1, grad, &data_init);
+//        // printf("%f, %f\n", minf, other);
+//        if(result<1){
+//            printf("NLOPT ERROR CODE %d x=%f\n", result, action[0]);
+//        }
+//        // dvalue0[i] = lagrange multiplier 0;
+//        // dvalue1[i] = lagrange multiplier 1;
+//    }
+//    //    printf("\n");
+//}
+
+
+//        x_knots[i] = xmin[0] + i/double(num_of_knots-1)*(xmax[0] - xmin[0]);
+//        y_knots[i] = xmin[1] + i/double(num_of_knots-1)*(xmax[1] - xmin[1]);
+
+//        printf("Price Coef\n");
+//        print_vec(price_coef, num_of_policy_coef);
+//        printf("\nPolicy Coef\n");
+//        print_vec(policy_coef, num_of_policy_coef);
+//        printf("\nValue Coef\n");
+//        print_vec(value_coef, num_of_value_coef);
+//        printf("\nValue Function\n");
+//        print_vec(value, S);
+
+//        fitting_lagrange(xy_knots, price, price_coef, alpha_policy_coef, num_of_policy_coef);
+//        printf("fitting value function\n");
+//        fitting_hermite(xy_knots, value, dvalue0, dvalue1, value_coef, alpha_value_coef, num_of_value_coef);
+//        fitting_lagrange(xy_knots, value, value_coef, alpha_value_coef, num_of_value_coef);
+//        printf("fitting policy function\n");
+//        fitting_lagrange(xy_knots, policy, policy_coef, alpha_policy_coef, num_of_policy_coef);
+
+double *test_state;
+test_state = new double[2];
+test_state[0] = 1.011649;
+test_state[1] = 1.011649;
+double a1 = V_hat(test_state, price_coef, alpha_policy_coef, num_of_policy_coef);
+double a2 = V_hat(test_state, policy_coef, alpha_policy_coef, num_of_policy_coef);
+double a3 = V_hat(test_state, value_coef, alpha_value_coef, num_of_value_coef);
+printf("(Price, Invest, Value) = (%.8f, %.8f, %.8f)\n", a1, a2, a3);
+delete[] test_state;
+
+//double cheb_eval(int n, const double *coef, double x){
+//    double  r = 0.0;
+//    double  s = 0.0;
+//    double  t;
+//    double  x2 = 2.0*x;
+//    while(--n>=1){
+//        t = r;
+//        r = x2*r - s + coef[n];
+//        s = t;
+//    }
+//    return x*r - s + coef[0];
+//}
+
+double g(double x){
+return x;
+}
+
+double D_g(double x){
+return 1.0;
+}
+
+double demand0(double *state, double *actions){
+double a1 = exp(v + theta*g(state[0]) - actions[0]);
+double a2 = exp(v + theta*g(state[1]) - V_hat(state, policy_coef, alpha_policy_coef, num_of_policy_coef));
+//double a3 = V_hat(state, policy_coef, alpha_policy_coef, num_of_policy_coef);
+return a1/(1+a1+a2);
+}
+
+double demand1(double *state, double *actions){
+double a1 = exp(v + theta*g(state[0]) - actions[0]);
+double a2 = exp(v + theta*g(state[1]) - V_hat(state, policy_coef, alpha_policy_coef, num_of_value_coef));
+return a2/(1+a1+a2);
+}
+
+double objective(double *state, double *actions){
+double D[2] = {
+demand0(state, actions),
+demand1(state, actions)
+};
+//double a1 = V_hat(D, value_coef, alpha_value_coef, num_of_policy_coef);
+//double a2 = -(D[0]*(actions[0] - c) + beta*V_hat(D, value_coef, alpha_value_coef, num_of_policy_coef));
+
+return -(D[0]*(actions[0] - c) + beta*V_hat(D, value_coef, alpha_value_coef, num_of_policy_coef));
+
+}
+
+double D_objective_d_p0(double *state, double *actions){
+double other_actions = V_hat(state, policy_coef, alpha_policy_coef, num_of_policy_coef);
+double a1 = exp(v + theta*g(state[0]) - actions[0]);
+double a2 = exp(v + theta*g(state[1]) - other_actions);
+double b1 = 1+a1+a2;
+double b2 = exp(2*v+theta*(g(state[0])+g(state[1]))-actions[0]-other_actions);
+double a3 = exp(2*(v + theta*g(state[0]) - actions[0]))/(b1*b1);
+double a4 = a1/b1;
+double s_prime[2] = {a4, demand1(state, actions)};
+//double b3 = -(a4 + (a3-a4)*(actions[0] - c) + beta*(dV_hat(s_prime, value_coef, 0, alpha_value_coef, num_of_value_coef)*(a3-a4) +
+//                                                    dV_hat(s_prime, value_coef, 1, alpha_value_coef, num_of_value_coef)*b2/(b1*b1)));
+
+return -(a4 + (a3-a4)*(actions[0] - c) + beta*(dV_hat(s_prime, value_coef, 0, alpha_value_coef, num_of_value_coef)*(a3-a4) +
+dV_hat(s_prime, value_coef, 1, alpha_value_coef, num_of_value_coef)*b2/(b1*b1)));
+}
+
+
+double objective_nlopt(const std::vector<double> &action, std::vector<double> &grad, void *data){
+objective_data *data_struct = (objective_data *) data;
+double *state_ptr = data_struct->state;
+double *actions_ptr;
+actions_ptr = new double[1];
+actions_ptr[0] = action[0];
+if(!grad.empty()){
+grad[0] = D_objective_d_p0(state_ptr, actions_ptr);
+}
+//    printf("%f    ", action[0]);
+double D[2] = {demand0(state_ptr, actions_ptr),
+demand1(state_ptr, actions_ptr)};
+delete[] actions_ptr;
+double a1 = -(D[0]*(action[0] - c) + beta*V_hat(D, value_coef, alpha_value_coef, num_of_value_coef));
+printf("(%f, %f, %f)\n", grad[0], a1, action[0]);
+return -(D[0]*(action[0] - c) + beta*V_hat(D, value_coef, alpha_value_coef, num_of_value_coef));
+}
+
+//double demand(int j, double *state, double *actions){
+//    double a1 = exp(v + theta*g(actions[j+1]) - actions[0]);
+//    double a2 = exp(v + theta*g(actions[j+2]) - V_hat(state, policy_coef, alpha_policy_coef, num_of_alpha));
+//    return a1/(1+a1+a2);
+//}
+
+//double D_objective_d_p0(double *state, double *actions){
+//    double a1 = demand(0, state, actions);
+//    double a2 = exp(v + theta*g(actions[3]) - V_hat(state, policy_coef, alpha_policy_coef, num_of_alpha));
+//    double a3 = exp(2*(v + theta*g(actions[2]) - actions[0]))/(a2*a2);
+//    double s_prime[2] = {a1, demand(1, state, actions)};
+//    return -(a1 + (a3-a1)*(actions[0] - c) +
+//             dV_hat(s_prime, value_coef, 0, alpha_value_coef, num_of_value_coef)*a3 +
+//             dV_hat(s_prime, value_coef, 1, alpha_value_coef, num_of_value_coef)*a2*(actions[0] - c));
+//}
+
+//double D_objective_d_s0(int j, double *state, double *action){
+//    double a1 = theta*D_g(action[2])*(action[0] - c);
+//    double a2 =
+//    return 0;
+//}
+
+//double D_objective_qual_d_p0(double *state, double *actions){
+//    double a1 = exp(2*(g_qual(state[0]) - actions[0]));
+//    double a2 = exp(g_qual(state[0]) - actions[0]);
+//    double a3 = 1 + a2 + exp(g_qual(state[1]) - V_hat(state, price_coef, alpha_policy_coef, num_of_policy_coef));
+//    //double a4 =  -(M*(actions[0]-c)*(a1/(a3*a3)-a2/a3) + M*a2/a3);
+//    return -(M*(actions[0]-c)*(a1/(a3*a3)-a2/a3) + M*a2/a3);
+//}
+
+    DataSet data_set;
+    data_set.set_data_file_name("model_data.csv");
+    data_set.set_separator("Comma");
+    data_set.load_data();
+
+    Instances* instances_pointer = data_set.get_instances_pointer();
+    instances_pointer->split_random_indices();
+    const Vector<Statistics> inputs_statistics = data_set.scale_inputs_minimum_maximum();
+
+    const Vector<Statistics> targets_statistics = data_set.scale_targets_minimum_maximum();
+    Variables* variables_pointer = data_set.get_variables_pointer();
+    const size_t inputs_number = variables_pointer->count_inputs_number();
+    const size_t outputs_number = variables_pointer->count_targets_number();
+    NeuralNetwork neural_network(inputs_number, 9, outputs_number);
+    neural_network.construct_scaling_layer();
+    ScalingLayer* scaling_layer_pointer = neural_network.get_scaling_layer_pointer();
+    scaling_layer_pointer->set_statistics(inputs_statistics);
+    scaling_layer_pointer->set_scaling_method(ScalingLayer::NoScaling);
+    neural_network.construct_unscaling_layer();
+    UnscalingLayer* unscaling_layer_pointer = neural_network.get_unscaling_layer_pointer();
+    unscaling_layer_pointer->set_statistics(targets_statistics);
+    unscaling_layer_pointer->set_unscaling_method(UnscalingLayer::NoUnscaling);
+
+    LossIndex loss_index(&neural_network, &data_set);
+    loss_index.set_error_type("NORMALIZED_SQUARED_ERROR");
+    loss_index.set_regularization_type(LossIndex::NEURAL_PARAMETERS_NORM);
+
+    TrainingStrategy training_strategy(&loss_index);
+    training_strategy.set_main_type(TrainingStrategy::QUASI_NEWTON_METHOD);
+    QuasiNewtonMethod* quasi_Newton_method_pointer = training_strategy.get_quasi_Newton_method_pointer();
+    quasi_Newton_method_pointer->set_maximum_iterations_number(1000);
+    quasi_Newton_method_pointer->set_display_period(10);
+    training_strategy.perform_training();
+
+    TestingAnalysis testing_analysis(&neural_network, &data_set);
+    TestingAnalysis::LinearRegressionResults linear_regression_results =
+	testing_analysis.perform_linear_regression_analysis();
+    
+    TestingAnalysis testing_analysis(&neural_network, &data_set);
+    Matrix confusion = testing_analysis.calculate_confusion();
+    unscaling_layer_pointer->set_unscaling_method(UnscalingLayer::MinimumMaximum);
