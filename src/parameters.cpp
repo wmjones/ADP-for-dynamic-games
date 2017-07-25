@@ -43,7 +43,6 @@ __attribute__((constructor)) void initialize(){
     S = num_of_knots*num_of_knots;
     num_of_test = 150;
     S_test = num_of_test*num_of_test;
-    policy_coef_degree_max = 100;
     coef_degree=0;
     M = 5.0;
     beta = 0.925;
@@ -66,7 +65,7 @@ __attribute__((constructor)) void initialize(){
     }
     coef_degree = coef_degree/5*2;
     printf("coef_degree = %zd\n", coef_degree);
-    num_of_coef = choose(policy_coef_degree + d, d);
+    num_of_coef = choose(coef_degree + d, d);
     printf("num_of_coef = %zd\n", num_of_coef);
     value_coef = new double[num_of_coef];
     policy_coef = new double[num_of_coef];

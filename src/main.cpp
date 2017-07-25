@@ -203,9 +203,9 @@ int main(int argv, char* argc[]){
         }
         // fitting_lagrange(xy_knots, policy, policy_coef, alpha_policy_coef, num_of_policy_coef);
 	// fitting_ann(xy_knots, z_knots, price, price_coef, alpha_policy_coef, num_of_policy_coef);
-	fitting(xy_knots, value, dvalue0, dvalue1, value_coef);
-	fitting(xy_knots, price, dvalue0, dvalue1, price_coef);
-	fitting(xy_knots, policy, dvalue0, dvalue1, policy_coef);
+	fitting(xy_knots, value, dvalue0, dvalue1, value_coef, z_knots);
+	fitting(xy_knots, price, dvalue0, dvalue1, price_coef, z_knots);
+	fitting(xy_knots, policy, dvalue0, dvalue1, policy_coef, z_knots);
         // fitting_Cai(xy_knots, z_knots, price, price_coef, alpha_policy_coef, num_of_policy_coef);
 	// fitting_Cai(xy_knots, z_knots, policy, policy_coef, alpha_policy_coef, num_of_policy_coef);
         // fitting_Cai(xy_knots, z_knots, value, value_coef, alpha_value_coef, num_of_value_coef);

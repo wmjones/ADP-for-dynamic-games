@@ -22,7 +22,7 @@
 //                  int **alpha, size_t num_of_alpha);
 // void fitting_ann(double **xy_data, double *v_hat);
 double predict(double *state);
-void fitting(double **xy_data, double *v_hat, double *dz_data0, double *dz_data1, double *b);
+void fitting(double **xy_data, double *v_hat, double *dz_data0, double *dz_data1, double *b, double **z_knots);
 
 inline double cheb_T(int n, double x){
     if(n==-1){

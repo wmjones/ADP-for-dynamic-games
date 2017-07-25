@@ -40,7 +40,7 @@ using namespace dlib;
 //     }
 // }
 
-void vander_lagrange(double **xy_data, double **X, int ** alpha, size_t num_of_alpha){
+void vander_lagrange(double **xy_data, double **X, int **alpha, size_t num_of_alpha){
     double z[d];
     for(size_t i=0; i<d; i++){
         z[i] = 0.0;
@@ -60,46 +60,50 @@ double predict(double *state){
     // if(approx_type == "cheb_hermite"){
     // 	return V_hat(state, value_coef, alpha, num_of_coef)
     // }
-    else if(approx_type == "cheb_lagrange"){
-	return V_hat(state, value_coef, alpha_coef, num_of_coef)
+    if(approx_type == "cheb_lagrange"){
+	return V_hat(state, value_coef, alpha_coef, num_of_coef);
     }
     else if(approx_type == "cai_lagrange"){
-	return V_hat(state, value_coef, alpha_coef, num_of_coef)
+	return V_hat(state, value_coef, alpha_coef, num_of_coef);
     }
-    else if{approx_type == "ann_lagrange"){
-	std::vector<matrix<float, 0, 1>> samples(S);
-	std::vector<float> labels(S);
+    else if(approx_type == "ann_lagrange"){
+	// std::vector<matrix<float, 0, 1>> samples(S);
+	// std::vector<float> labels(S);
 
-	for(size_t i=0; i<S; i++){
-	    samples[i] = {xy_data[i][0], xy_data[i][1]};
-	    labels[i] = {v_hat[i]};
-	}
+	// for(size_t i=0; i<S; i++){
+	//     samples[i] = {xy_data[i][0], xy_data[i][1]};
+	//     labels[i] = {v_hat[i]};
+	// }
 
-	using net_type = loss_mean_squared<fc<1,
-					// fc<5,
-					// fc<5,
-					// htan<l2normalize<
-					  htan<fc<225,
-					  input<matrix<float,0,1>>
-					  >>>>;
-	net_type net;
-	dnn_trainer<net_type> trainer(net);
+	// using net_type = loss_mean_squared<fc<1,
+	// 				// fc<5,
+	// 				// fc<5,
+	// 				// htan<l2normalize<
+	// 				  htan<fc<225,
+	// 				  input<matrix<float,0,1>>
+	// 				  >>>>;
+	// net_type net;
+	// dnn_trainer<net_type> trainer(net);
 
-	trainer.set_learning_rate(0.1);
-	for(int i=0; i<1000; i++)
-	    trainer.train_one_step(samples, labels);
-	trainer.get_net();
+	// trainer.set_learning_rate(0.1);
+	// for(int i=0; i<1000; i++)
+	//     trainer.train_one_step(samples, labels);
+	// trainer.get_net();
+	return 0;
+    }
+    else{
+	return 0;
     }
 }
 
 // Need to fix args for hermite fitting
-void fitting(double **xy_data, double *v_hat, double *dz_data0, double *dz_data1, double *b){
+void fitting(double **xy_data, double *v_hat, double *dz_data0, double *dz_data1, double *b, double **z_knots){
     // if(approx_type == "cheb_hermite"){
     // 	// void fitting_hermite(double **xy_data, double *v_hat,
-    // 	// double *dz_data0, double *dz_data1, double *b,  int **alpha, size_t num_of_alpha)
-    // 	Eigen::MatrixXd data(3*S, num_of_alpha);
+    // 	// double *dz_data0, double *dz_data1, double *b,  int **alpha, size_t num_of_coef)
+    // 	Eigen::MatrixXd data(3*S, num_of_coef);
     // 	Eigen::VectorXd y = Eigen::VectorXd::Zero(3*S);
-    // 	Eigen::VectorXd coef = Eigen::VectorXd::Zero(num_of_alpha);
+    // 	Eigen::VectorXd coef = Eigen::VectorXd::Zero(num_of_coef);
 
     // 	for(size_t i=0; i<S; i++){
     // 	    y[i] = v_hat[i];
@@ -112,17 +116,17 @@ void fitting(double **xy_data, double *v_hat, double *dz_data0, double *dz_data1
     // 	}
     // 	double **X = new double*[3*S];
     // 	for(size_t i=0; i<3*S; i++){
-    // 	    X[i] = new double[num_of_alpha];
+    // 	    X[i] = new double[num_of_coef];
     // 	}
-    // 	vander_hermite(xy_data, X, alpha, num_of_alpha);
+    // 	vander_hermite(xy_data, X, alpha, num_of_coef);
     // 	for(size_t i=0; i<3*S; i++){
-    // 	    for(size_t j=0; j<num_of_alpha; j++){
+    // 	    for(size_t j=0; j<num_of_coef; j++){
     // 		data(i, j) =  X[i][j];
     // 	    }
     // 	}
     // 	coef = (data.transpose() * data).ldlt().solve(data.transpose() * y);
     // 	//    coef = data.colPivHouseholderQr().solve(y);
-    // 	for(size_t i=0; i<num_of_alpha; i++){
+    // 	for(size_t i=0; i<num_of_coef; i++){
     // 	    b[i] = coef[i];
     // 	}
     // 	for(size_t i=0; i<3*S; i++){
@@ -133,26 +137,26 @@ void fitting(double **xy_data, double *v_hat, double *dz_data0, double *dz_data1
 
     if(approx_type == "cheb_lagrange"){
 	// void fitting_lagrange(double **xy_data, double *v, double *b,
-        //               int ** alpha, size_t num_of_alpha)
-	Eigen::MatrixXd data(S, num_of_alpha);
+        //               int ** alpha, size_t num_of_coef)
+	Eigen::MatrixXd data(S, num_of_coef);
 	Eigen::VectorXd y = Eigen::VectorXd::Zero(S);
-	Eigen::VectorXd coef = Eigen::VectorXd::Zero(num_of_alpha);
+	Eigen::VectorXd coef = Eigen::VectorXd::Zero(num_of_coef);
 	for(size_t i=0; i<S; i++){
-	    y(i) = v[i];
+	    y(i) = v_hat[i];
 	}
 	double **X = new double*[S];
 	for(size_t i=0; i<S; i++){
-	    X[i] = new double[num_of_alpha];
+	    X[i] = new double[num_of_coef];
 	}
-	vander_lagrange(xy_data, X, alpha, num_of_alpha);
+	vander_lagrange(xy_data, X, alpha_coef, num_of_coef);
 	for(size_t i=0; i<S; i++){
-	    for(size_t j=0; j<num_of_alpha; j++){
+	    for(size_t j=0; j<num_of_coef; j++){
 		data(i, j) =  X[i][j];
 	    }
 	}
     //    coef = (data.transpose() * data).ldlt().solve(data.transpose() * y);
 	coef = data.colPivHouseholderQr().solve(y);
-	for(size_t i=0; i<num_of_alpha; i++){
+	for(size_t i=0; i<num_of_coef; i++){
 	    b[i] = coef(i);
 	}
 
@@ -164,18 +168,18 @@ void fitting(double **xy_data, double *v_hat, double *dz_data0, double *dz_data1
 
     else if(approx_type == "cai_lagrange"){
 	// void fitting_Cai(double **xy_data, double **z_knots, double *v_hat, double *b,
-        //          int **alpha, size_t num_of_alpha)
-	for(size_t i=0; i<num_of_alpha; i++){
+        //          int **alpha, size_t num_of_coef)
+	for(size_t i=0; i<num_of_coef; i++){
 	    double out = 0;
 	    for(size_t j=0; j<S; j++){
-		if(isnan(T_alpha(z_knots[j], alpha[i]))){
+		if(isnan(T_alpha(z_knots[j], alpha_coef[i]))){
 		    printf("hello 1\n");
 		}
-		out+=v_hat[j]*T_alpha(z_knots[j], alpha[i]);
+		out+=v_hat[j]*T_alpha(z_knots[j], alpha_coef[i]);
 	    }
 	    double d_tilde = 0;
 	    for(size_t j=0; j<d; j++){
-		d_tilde+=(alpha[i][j]>0)?1:0;
+		d_tilde+=(alpha_coef[i][j]>0)?1:0;
 	    }
 	    if(isnan(out/((double) pow(num_of_knots, d))*pow(2, d_tilde))){
 		printf("hello 2\n");
@@ -184,28 +188,28 @@ void fitting(double **xy_data, double *v_hat, double *dz_data0, double *dz_data1
 	}
     }
 
-    else if{approx_type == "ann_lagrange"){
-		std::vector<matrix<float, 0, 1>> samples(S);
-	std::vector<float> labels(S);
+    else if(approx_type == "ann_lagrange"){
+	// std::vector<matrix<float, 0, 1>> samples(S);
+	// std::vector<float> labels(S);
 
-	for(size_t i=0; i<S; i++){
-	    samples[i] = {xy_data[i][0], xy_data[i][1]};
-	    labels[i] = {v_hat[i]};
-	}
+	// for(size_t i=0; i<S; i++){
+	//     samples[i] = {xy_data[i][0], xy_data[i][1]};
+	//     labels[i] = {v_hat[i]};
+	// }
 
-	using net_type = loss_mean_squared<fc<1,
-					// fc<5,
-					// fc<5,
-					// htan<l2normalize<
-					  htan<fc<225,
-					  input<matrix<float,0,1>>
-					  >>>>;
-	net_type net;
-	dnn_trainer<net_type> trainer(net);
+	// using net_type = loss_mean_squared<fc<1,
+	// 				// fc<5,
+	// 				// fc<5,
+	// 				// htan<l2normalize<
+	// 				  htan<fc<225,
+	// 				  input<matrix<float,0,1>>
+	// 				  >>>>;
+	// net_type net;
+	// dnn_trainer<net_type> trainer(net);
 
-	trainer.set_learning_rate(0.1);
-	for(int i=0; i<1000; i++)
-	    trainer.train_one_step(samples, labels);
-	trainer.get_net();
+	// trainer.set_learning_rate(0.1);
+	// for(int i=0; i<1000; i++)
+	//     trainer.train_one_step(samples, labels);
+	// trainer.get_net();
     }
 }
