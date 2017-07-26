@@ -1,6 +1,6 @@
 library(foreach)
 library(doParallel)
-data <- read.csv("../model_data.csv", header=TRUE)
+data <- read.csv("model_data.csv", header=TRUE)
 cores=detectCores()
 cl <- makeCluster(cores[1]-1) #not to overload your computer
 registerDoParallel(cl)
@@ -10,7 +10,7 @@ out <- foreach(i=1:Nmax) %dopar% {
     library(plot3D)
     subdata <- data[((i-1)*22500 + 1):(i*22500),]
     attach(subdata)
-    name <- paste("../figs/plot", i, ".jpg", sep = "")
+    name <- paste("figs/plot", i, ".jpg", sep = "")
     jpeg(file = name, width=3*480, height=2*480)
     par(mfrow=c(3, 3))
     scatter3D(x, y, v, theta=-45)

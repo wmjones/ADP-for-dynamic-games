@@ -39,7 +39,7 @@ const size_t choose(size_t n, size_t k){
 __attribute__((constructor)) void initialize(){
     d = 2;
     Nmax = 100;
-    num_of_knots = 14;
+    num_of_knots = 30;
     S = num_of_knots*num_of_knots;
     num_of_test = 150;
     S_test = num_of_test*num_of_test;
@@ -64,6 +64,7 @@ __attribute__((constructor)) void initialize(){
 	coef_degree += 1;
     }
     coef_degree = coef_degree/5*2;
+    coef_degree = 12;
     printf("coef_degree = %zd\n", coef_degree);
     num_of_coef = choose(coef_degree + d, d);
     printf("num_of_coef = %zd\n", num_of_coef);

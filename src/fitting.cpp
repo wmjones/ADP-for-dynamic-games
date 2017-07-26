@@ -189,27 +189,27 @@ void fitting(double **xy_data, double *v_hat, double *dz_data0, double *dz_data1
     }
 
     else if(approx_type == "ann_lagrange"){
-	// std::vector<matrix<float, 0, 1>> samples(S);
-	// std::vector<float> labels(S);
+	std::vector<matrix<float, 0, 1>> samples(S);
+	std::vector<float> labels(S);
 
-	// for(size_t i=0; i<S; i++){
-	//     samples[i] = {xy_data[i][0], xy_data[i][1]};
-	//     labels[i] = {v_hat[i]};
-	// }
+	for(size_t i=0; i<S; i++){
+	    samples[i] = {xy_data[i][0], xy_data[i][1]};
+	    labels[i] = {v_hat[i]};
+	}
 
-	// using net_type = loss_mean_squared<fc<1,
-	// 				// fc<5,
-	// 				// fc<5,
-	// 				// htan<l2normalize<
-	// 				  htan<fc<225,
-	// 				  input<matrix<float,0,1>>
-	// 				  >>>>;
-	// net_type net;
-	// dnn_trainer<net_type> trainer(net);
+	using net_type = loss_mean_squared<fc<1,
+					// fc<5,
+					// fc<5,
+					// htan<l2normalize<
+					  htan<fc<225,
+					  input<matrix<float,0,1>>
+					  >>>>;
+	net_type net;
+	dnn_trainer<net_type> trainer(net);
 
-	// trainer.set_learning_rate(0.1);
-	// for(int i=0; i<1000; i++)
-	//     trainer.train_one_step(samples, labels);
-	// trainer.get_net();
+	trainer.set_learning_rate(0.1);
+	for(int i=0; i<1000; i++)
+	    trainer.train_one_step(samples, labels);
+	trainer.get_net();
     }
 }
