@@ -1,6 +1,6 @@
 library(foreach)
 library(doParallel)
-data <- read.csv("model_data.csv", header=TRUE)
+data <- read.csv("../model_data.csv", header=TRUE)
 cores=detectCores()
 cl <- makeCluster(cores[1]-1) #not to overload your computer
 registerDoParallel(cl)
