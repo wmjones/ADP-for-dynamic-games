@@ -99,7 +99,7 @@ void bellman(double **xy_knots, double *value, double *value_last, double *polic
 
 void plotting(double **xy_knots, double *value, size_t k){
     if(k==0){
-        myfile.open("../model_data.csv");
+        myfile.open("model_data.csv");
         myfile << "x,y,v,p,inv,x1,y1,v1\n";
     }
     double *x_test, *y_test, *v_test, *p_test, *inv_test;

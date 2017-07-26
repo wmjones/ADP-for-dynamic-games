@@ -1,4 +1,6 @@
+program
 model_data.csv
+.DS_store
 
 # Prerequisites
 *.d
