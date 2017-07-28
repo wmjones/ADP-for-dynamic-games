@@ -10,9 +10,9 @@
 #include <omp.h>
 #include <stdio.h>
 
-#include <dlib/dnn.h>
-#include <dlib/data_io.h>
-using namespace dlib;
+// #include <dlib/dnn.h>
+// #include <dlib/data_io.h>
+// using namespace dlib;
 
 // void print_mat(double **mat, size_t s0, size_t s1) {
 //     for(size_t i=0; i<s0; i++){
@@ -123,7 +123,8 @@ void plotting(double **xy_knots, double *value, size_t k){
         xy_test[i][1] = y_test[i / num_of_test];
     }
     for(size_t i=0; i<S_test; i++){
-        v_test[i] = V_hat(xy_test[i], value_coef, alpha_coef, num_of_coef);
+        v_test[i] = predict(xy_test[i]);
+	// V_hat(xy_test[i], value_coef, alpha_coef, num_of_coef);
         p_test[i] = V_hat(xy_test[i], price_coef, alpha_coef, num_of_coef);
         inv_test[i] = V_hat(xy_test[i], policy_coef, alpha_coef, num_of_coef);
     }
@@ -189,6 +190,7 @@ int main(int argv, char* argc[]){
     value_last = new double [S];
     price_last = new double [S];
     policy_last = new double [S];
+    fitting(xy_knots, value, dvalue0, dvalue1, value_coef, z_knots);
     for(size_t k=0; k<Nmax; k++){
         for(size_t i=0; i<S; i++){
             value_last[i] = value[i];
@@ -201,14 +203,9 @@ int main(int argv, char* argc[]){
             price[i] = price[i]*eta + (1-eta)*price_last[i];
             policy[i] = policy[i]*eta + (1-eta)*policy_last[i];
         }
-        // fitting_lagrange(xy_knots, policy, policy_coef, alpha_policy_coef, num_of_policy_coef);
-	// fitting_ann(xy_knots, z_knots, price, price_coef, alpha_policy_coef, num_of_policy_coef);
 	fitting(xy_knots, value, dvalue0, dvalue1, value_coef, z_knots);
-	fitting(xy_knots, price, dvalue0, dvalue1, price_coef, z_knots);
-	fitting(xy_knots, policy, dvalue0, dvalue1, policy_coef, z_knots);
-        // fitting_Cai(xy_knots, z_knots, price, price_coef, alpha_policy_coef, num_of_policy_coef);
-	// fitting_Cai(xy_knots, z_knots, policy, policy_coef, alpha_policy_coef, num_of_policy_coef);
-        // fitting_Cai(xy_knots, z_knots, value, value_coef, alpha_value_coef, num_of_value_coef);
+	// fitting(xy_knots, price, dvalue0, dvalue1, price_coef, z_knots);
+	// fitting(xy_knots, policy, dvalue0, dvalue1, policy_coef, z_knots);
         plotting(xy_knots, value, k);
         printf("%zd\n", k);
     }
@@ -224,8 +221,10 @@ int main(int argv, char* argc[]){
     delete[] price_last;
     delete[] dvalue0;
     delete[] dvalue1;
+    delete[] z;
     for(size_t i=0; i<S; i++){
         delete[] xy_knots[i];
+	delete[] z_knots[i];
     }
     delete[] xy_knots;
     for(size_t i=0; i<num_of_coef; i++){

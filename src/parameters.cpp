@@ -1,6 +1,10 @@
 #include "parameters.hpp"
 #include <math.h>
 #include <stdio.h>
+// #include <dlib/dnn.h>
+// #include <dlib/data_io.h>
+// using namespace std;
+// using namespace dlib;
 
 size_t d;
 size_t num_of_actions;
@@ -25,7 +29,14 @@ double *value_coef;
 double *policy_coef;
 double *price_coef;
 int **alpha_coef;
-std::string approx_type = "cai_lagrange";
+std::string approx_type = "ann_lagrange";
+// using net_type = loss_mean_squared<fc<1,
+// 				      htan<fc<225,
+// 				      input<matrix<float,0,1>>
+// 				      >>>>;
+// net_type net;
+// dnn_trainer<net_type> trainer(net);
+
 
 const size_t choose(size_t n, size_t k){
     if(k==0){
@@ -38,8 +49,8 @@ const size_t choose(size_t n, size_t k){
 
 __attribute__((constructor)) void initialize(){
     d = 2;
-    Nmax = 100;
-    num_of_knots = 30;
+    Nmax = 2;
+    num_of_knots = 10;
     S = num_of_knots*num_of_knots;
     num_of_test = 150;
     S_test = num_of_test*num_of_test;
@@ -88,6 +99,17 @@ __attribute__((constructor)) void initialize(){
             }
         }
     }
+
+    // if(approx_type == "ann_lagrange"){
+    // 	using net_type = loss_mean_squared<fc<1,
+    // 					// fc<5,
+    // 					// fc<5,
+    // 					// htan<l2normalize<
+    // 					  htan<fc<225,
+    // 					  input<matrix<float,0,1>>
+    // 					  >>>>;
+    // 	net_type net;
+    // }
 
     // value_coef_degree = 2*num_of_knots - 1;
     // value_coef_degree = policy_coef_degree;

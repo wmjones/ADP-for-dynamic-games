@@ -4,6 +4,10 @@
 #include <stdio.h>
 #include <math.h>
 #include "parameters.hpp"
+#include <dlib/dnn.h>
+#include <dlib/data_io.h>
+using namespace std;
+using namespace dlib;
 
 // double cheb_T(const size_t n, const double x);
 // double cheb_U(size_t n, double x);

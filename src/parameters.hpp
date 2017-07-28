@@ -3,6 +3,11 @@
 
 #include <string>
 #include <stdio.h>
+#include <dlib/dnn.h>
+#include <dlib/data_io.h>
+using namespace std;
+using namespace dlib;
+
 extern std::string approx_type;
 extern size_t d;
 extern size_t Nmax;
@@ -27,6 +32,16 @@ extern double *value_coef;
 extern double *policy_coef;
 extern double *price_coef;
 extern int **alpha_coef;
+
+// using net_type = loss_mean_squared<fc<1,
+// 					// fc<5,
+// 					// fc<5,
+// 					// htan<l2normalize<
+// 					  htan<fc<225,
+// 					  input<matrix<float,0,1>>
+// 					  >>>>;
+// extern net_type net;
+// extern dnn_trainer<net_type> trainer;
 
 typedef struct {
     double *state;

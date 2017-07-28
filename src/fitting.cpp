@@ -4,10 +4,20 @@
 #include <eigen3/Eigen/Dense>
 #include "parameters.hpp"
 #include "fitting.hpp"
+
 #include <dlib/dnn.h>
 #include <dlib/data_io.h>
 using namespace std;
 using namespace dlib;
+using net_type = loss_mean_squared<fc<1,
+					// fc<5,
+					// fc<5,
+					// htan<l2normalize<
+					  htan<fc<100,
+					  input<matrix<float,0,1>>
+					  >>>>;
+net_type net;
+
 
 // void vander_hermite(double **xy_data, double **X, int ** alpha, size_t num_of_alpha){
 //     double z[d];
@@ -67,28 +77,13 @@ double predict(double *state){
 	return V_hat(state, value_coef, alpha_coef, num_of_coef);
     }
     else if(approx_type == "ann_lagrange"){
-	// std::vector<matrix<float, 0, 1>> samples(S);
-	// std::vector<float> labels(S);
-
-	// for(size_t i=0; i<S; i++){
-	//     samples[i] = {xy_data[i][0], xy_data[i][1]};
-	//     labels[i] = {v_hat[i]};
-	// }
-
-	// using net_type = loss_mean_squared<fc<1,
-	// 				// fc<5,
-	// 				// fc<5,
-	// 				// htan<l2normalize<
-	// 				  htan<fc<225,
-	// 				  input<matrix<float,0,1>>
-	// 				  >>>>;
-	// net_type net;
-	// dnn_trainer<net_type> trainer(net);
-
-	// trainer.set_learning_rate(0.1);
-	// for(int i=0; i<1000; i++)
-	//     trainer.train_one_step(samples, labels);
-	// trainer.get_net();
+	std::vector<matrix<float, 0, 1>> sample(1);
+	sample[0] = {(state[0] - xmin[0])/(xmax[0] - xmin[0]),
+		     (state[1] - xmin[1])/(xmax[1] - xmin[1])};
+	auto out = net(sample);
+	// return out[0];
+	// printf("%f\n", out[0]);
+	// std::cout << out[0] << std::endl;
 	return 0;
     }
     else{
@@ -193,23 +188,26 @@ void fitting(double **xy_data, double *v_hat, double *dz_data0, double *dz_data1
 	std::vector<float> labels(S);
 
 	for(size_t i=0; i<S; i++){
-	    samples[i] = {xy_data[i][0], xy_data[i][1]};
+	    samples[i] = {(xy_data[i][0] - xmin[0])/(xmax[0] - xmin[0]),
+			  (xy_data[i][1] - xmin[1])/(xmax[1] - xmin[1])};
 	    labels[i] = {v_hat[i]};
+	    std::cout << "i=" << i << "\tsample=(" << samples[i](0,0) << ", "
+		      << samples[i](1,0) << ")\t\tlabel=" << labels[i] << std::endl;
 	}
 
-	using net_type = loss_mean_squared<fc<1,
-					// fc<5,
-					// fc<5,
-					// htan<l2normalize<
-					  htan<fc<225,
-					  input<matrix<float,0,1>>
-					  >>>>;
-	net_type net;
+	// trainer();
 	dnn_trainer<net_type> trainer(net);
 
 	trainer.set_learning_rate(0.1);
-	for(int i=0; i<1000; i++)
+
+	for(int i=0; i<10000; i++)
 	    trainer.train_one_step(samples, labels);
 	trainer.get_net();
+	std::vector<matrix<float, 0, 1>> sample(1);
+	sample[0] = {1, 1};
+	auto out = net(sample);
+	// return out[0];
+	// printf("%f\n", out[0]);
+	std::cout << out[0] << std::endl;
     }
 }
