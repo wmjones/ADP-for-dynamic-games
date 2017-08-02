@@ -103,10 +103,10 @@ void plotting(double **xy_knots, double *value, size_t k){
         xy_test[i][1] = y_test[i / num_of_test];
     }
     for(size_t i=0; i<S_test; i++){
-        v_test[i] = V_hat(xy_test[i], value_coef, alpha_coef, num_of_coef);// predict(xy_test[i]);
+        v_test[i] = predict(xy_test[i]); // V_hat(xy_test[i], value_coef, alpha_coef, num_of_coef);
 	// V_hat(xy_test[i], value_coef, alpha_coef, num_of_coef);
         p_test[i] = V_hat(xy_test[i], price_coef, alpha_coef, num_of_coef);
-        inv_test[i] = V_hat(xy_test[i], policy_coef, alpha_coef, num_of_coef);
+	inv_test[i] = V_hat(xy_test[i], policy_coef, alpha_coef, num_of_coef);
     }
     for(size_t i=0; i<S_test; i++){
         double x1 = 0;

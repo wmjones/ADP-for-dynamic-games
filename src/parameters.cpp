@@ -25,10 +25,10 @@ double *value_coef;
 double *policy_coef;
 double *price_coef;
 int **alpha_coef;
-std::string approx_type = "cai";
-std::string cai("cai");
-std::string cheb("cheb");
-std::string ann("ann");
+std::string approx_type;
+std::string cai;
+std::string cheb;
+std::string ann;
 
 
 const size_t choose(size_t n, size_t k){
@@ -41,9 +41,13 @@ const size_t choose(size_t n, size_t k){
 }
 
 __attribute__((constructor)) void initialize(){
+    approx_type = "ann";
+    cai = "cai";
+    cheb = "cheb";
+    ann = "ann";
     d = 2;
     Nmax = 100;
-    num_of_knots = 10;
+    num_of_knots = 12;
     S = num_of_knots*num_of_knots;
     num_of_test = 150;
     S_test = num_of_test*num_of_test;
@@ -61,7 +65,7 @@ __attribute__((constructor)) void initialize(){
     xmax = new double[d];
     xmax[0] = 18.0; xmax[1] = 18.0;
 
-    if(approx_type.compare(cai)==0 || approx_type.compare(cheb)==0){
+    // if(approx_type.compare(cai)==0 || approx_type.compare(cheb)==0){
 	while(choose(coef_degree+1 + d, d)<pow(num_of_knots, d)){
 	    coef_degree += 1;
 	}
@@ -90,10 +94,10 @@ __attribute__((constructor)) void initialize(){
 		}
 	    }
 	}
-    }
-    else{
-	printf("Value Function Approximation with ANN\n");
-    }
+    // }
+    // else{
+    // 	printf("Value Function Approximation with ANN\n");
+    // }
 
     // value_coef_degree = 2*num_of_knots - 1;
     // value_coef_degree = policy_coef_degree;

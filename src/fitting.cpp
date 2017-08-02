@@ -13,7 +13,7 @@ using net_type = loss_mean_squared<fc<1,
 					// fc<5,
 					// fc<5,
 					// htan<l2normalize<
-					  htan<fc<50,
+					  htan<fc<144,
 					  input<matrix<float,0,1>>
 					  >>>>;
 net_type net;
@@ -77,6 +77,7 @@ double predict(double *state){
 	return V_hat(state, value_coef, alpha_coef, num_of_coef);
     }
     else if(approx_type.compare(ann)==0){
+	printf("hello\n");
 	std::vector<matrix<float, 0, 1>> sample(1);
 	sample[0] = {(state[0] - xmin[0])/(xmax[0] - xmin[0]),
 		     (state[1] - xmin[1])/(xmax[1] - xmin[1])};
@@ -187,15 +188,15 @@ void fitting(double **xy_data, double *v_hat, double *dz_data0, double *dz_data1
 	    samples[i] = {(xy_data[i][0] - xmin[0])/(xmax[0] - xmin[0]),
 			  (xy_data[i][1] - xmin[1])/(xmax[1] - xmin[1])};
 	    labels[i] = {v_hat[i]};
-	    // std::cout << "i=" << i << "\tsample=(" << samples[i](0,0) << ", "
-	    // 	      << samples[i](1,0) << ")\t\tlabel=" << labels[i] << std::endl;
+	    std::cout << "i=" << i << "\tsample=(" << samples[i](0,0) << ", "
+	    	      << samples[i](1,0) << ")\t\tlabel=" << labels[i] << std::endl;
 	}
 
 	// trainer();
 	dnn_trainer<net_type> trainer(net);
 	trainer.set_learning_rate(0.1);
 
-	for(int i=0; i<10000; i++)
+	for(int i=0; i<100000; i++)
 	    trainer.train_one_step(samples, labels);
 	trainer.get_net();
 	std::vector<matrix<float, 0, 1>> sample(1);
