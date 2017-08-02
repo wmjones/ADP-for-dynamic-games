@@ -32,16 +32,11 @@ extern double *value_coef;
 extern double *policy_coef;
 extern double *price_coef;
 extern int **alpha_coef;
+extern std::string approx_type;
+extern std::string cai;
+extern std::string cheb;
+extern std::string ann;
 
-// using net_type = loss_mean_squared<fc<1,
-// 					// fc<5,
-// 					// fc<5,
-// 					// htan<l2normalize<
-// 					  htan<fc<225,
-// 					  input<matrix<float,0,1>>
-// 					  >>>>;
-// extern net_type net;
-// extern dnn_trainer<net_type> trainer;
 
 typedef struct {
     double *state;

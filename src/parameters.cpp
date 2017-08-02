@@ -1,10 +1,6 @@
 #include "parameters.hpp"
 #include <math.h>
 #include <stdio.h>
-// #include <dlib/dnn.h>
-// #include <dlib/data_io.h>
-// using namespace std;
-// using namespace dlib;
 
 size_t d;
 size_t num_of_actions;
@@ -29,13 +25,10 @@ double *value_coef;
 double *policy_coef;
 double *price_coef;
 int **alpha_coef;
-std::string approx_type = "ann_lagrange";
-// using net_type = loss_mean_squared<fc<1,
-// 				      htan<fc<225,
-// 				      input<matrix<float,0,1>>
-// 				      >>>>;
-// net_type net;
-// dnn_trainer<net_type> trainer(net);
+std::string approx_type = "cai";
+std::string cai("cai");
+std::string cheb("cheb");
+std::string ann("ann");
 
 
 const size_t choose(size_t n, size_t k){
@@ -49,7 +42,7 @@ const size_t choose(size_t n, size_t k){
 
 __attribute__((constructor)) void initialize(){
     d = 2;
-    Nmax = 2;
+    Nmax = 100;
     num_of_knots = 10;
     S = num_of_knots*num_of_knots;
     num_of_test = 150;
@@ -68,48 +61,39 @@ __attribute__((constructor)) void initialize(){
     xmax = new double[d];
     xmax[0] = 18.0; xmax[1] = 18.0;
 
-    // if (approx_type == "cheb_hermite"){
-    // 	// Drop out hermite?
-    // }
-    while(choose(coef_degree+1 + d, d)<pow(num_of_knots, d)){
-	coef_degree += 1;
+    if(approx_type.compare(cai)==0 || approx_type.compare(cheb)==0){
+	while(choose(coef_degree+1 + d, d)<pow(num_of_knots, d)){
+	    coef_degree += 1;
+	}
+	coef_degree = coef_degree/5*2;
+	coef_degree = 12;
+	printf("coef_degree = %zd\n", coef_degree);
+	num_of_coef = choose(coef_degree + d, d);
+	printf("num_of_coef = %zd\n", num_of_coef);
+	value_coef = new double[num_of_coef];
+	policy_coef = new double[num_of_coef];
+	price_coef = new double[num_of_coef];
+	alpha_coef = new int*[num_of_coef];
+	for(size_t i=0; i<num_of_coef; i++){
+	    alpha_coef[i] = new int[d];
+	    policy_coef[i] = 0.0;
+	    price_coef[i] = 0.0;
+	    value_coef[i] = 0.0;
+	}
+	size_t k=0;
+	for(int i=0; i<=(int)coef_degree; i++){
+	    for(int j=0; j<=(int)coef_degree; j++){
+		if(i+j<=(int)coef_degree){
+		    alpha_coef[k][0] = i;
+		    alpha_coef[k][1] = j;
+		    k+=1;
+		}
+	    }
+	}
     }
-    coef_degree = coef_degree/5*2;
-    coef_degree = 12;
-    printf("coef_degree = %zd\n", coef_degree);
-    num_of_coef = choose(coef_degree + d, d);
-    printf("num_of_coef = %zd\n", num_of_coef);
-    value_coef = new double[num_of_coef];
-    policy_coef = new double[num_of_coef];
-    price_coef = new double[num_of_coef];
-    alpha_coef = new int*[num_of_coef];
-    for(size_t i=0; i<num_of_coef; i++){
-        alpha_coef[i] = new int[d];
-        policy_coef[i] = 0.0;
-        price_coef[i] = 0.0;
-	value_coef[i] = 0.0;
+    else{
+	printf("Value Function Approximation with ANN\n");
     }
-    size_t k=0;
-    for(int i=0; i<=(int)coef_degree; i++){
-        for(int j=0; j<=(int)coef_degree; j++){
-            if(i+j<=(int)coef_degree){
-                alpha_coef[k][0] = i;
-                alpha_coef[k][1] = j;
-                k+=1;
-            }
-        }
-    }
-
-    // if(approx_type == "ann_lagrange"){
-    // 	using net_type = loss_mean_squared<fc<1,
-    // 					// fc<5,
-    // 					// fc<5,
-    // 					// htan<l2normalize<
-    // 					  htan<fc<225,
-    // 					  input<matrix<float,0,1>>
-    // 					  >>>>;
-    // 	net_type net;
-    // }
 
     // value_coef_degree = 2*num_of_knots - 1;
     // value_coef_degree = policy_coef_degree;

@@ -10,26 +10,6 @@
 #include <omp.h>
 #include <stdio.h>
 
-// #include <dlib/dnn.h>
-// #include <dlib/data_io.h>
-// using namespace dlib;
-
-// void print_mat(double **mat, size_t s0, size_t s1) {
-//     for(size_t i=0; i<s0; i++){
-//         for(size_t j=0; j<s1; j++){
-//             printf("%.4f ", mat[i][j]);
-//         }
-//         printf("\n");
-//     }
-// }
-
-// void print_vec(double *vec, size_t s0){
-//     for(size_t i=0; i<s0; i++){
-//         printf("%.8f ", vec[i]);
-//     }
-//     printf("\n");
-// }
-
 using namespace std;
 ofstream myfile;
 
@@ -123,7 +103,7 @@ void plotting(double **xy_knots, double *value, size_t k){
         xy_test[i][1] = y_test[i / num_of_test];
     }
     for(size_t i=0; i<S_test; i++){
-        v_test[i] = predict(xy_test[i]);
+        v_test[i] = V_hat(xy_test[i], value_coef, alpha_coef, num_of_coef);// predict(xy_test[i]);
 	// V_hat(xy_test[i], value_coef, alpha_coef, num_of_coef);
         p_test[i] = V_hat(xy_test[i], price_coef, alpha_coef, num_of_coef);
         inv_test[i] = V_hat(xy_test[i], policy_coef, alpha_coef, num_of_coef);
@@ -204,8 +184,8 @@ int main(int argv, char* argc[]){
             policy[i] = policy[i]*eta + (1-eta)*policy_last[i];
         }
 	fitting(xy_knots, value, dvalue0, dvalue1, value_coef, z_knots);
-	// fitting(xy_knots, price, dvalue0, dvalue1, price_coef, z_knots);
-	// fitting(xy_knots, policy, dvalue0, dvalue1, policy_coef, z_knots);
+	fitting(xy_knots, price, dvalue0, dvalue1, price_coef, z_knots);
+	fitting(xy_knots, policy, dvalue0, dvalue1, policy_coef, z_knots);
         plotting(xy_knots, value, k);
         printf("%zd\n", k);
     }

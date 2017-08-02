@@ -15,7 +15,6 @@ model_data.csv : program
 
 program : main.cpp parameters.cpp model.cpp fitting.cpp
 	$(CXX) -march=native -O3 -fopenmp -lstdc++ -lm -std=c++11 -lnlopt -ldlib -I/usr/local/include/ $^ -o $@
-# -march=native
 
 d : main.cpp parameters.cpp model.cpp fitting.cpp
 	$(CXX) -g -Wall -fopenmp -lstdc++ -lm -std=c++11 -lnlopt -ldlib -I/usr/local/include/ $^ -o $@

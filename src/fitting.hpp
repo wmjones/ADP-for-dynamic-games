@@ -9,22 +9,6 @@
 using namespace std;
 using namespace dlib;
 
-// double cheb_T(const size_t n, const double x);
-// double cheb_U(size_t n, double x);
-// double T_alpha(const double *z, const int *alpha);
-// double dT_alpha(double *z, int del, int *alpha);
-// double V_hat(double *x, double *coef, int **alpha, size_t num_of_alpha);
-// double V_hat(double *x, double *coef, int **alpha, size_t num_of_alpha);
-// double dV_hat(double *x, double *b, int del, int **alpha, size_t num_of_alpha);
-// void vander_hermite(double **xy_data, double **X, int ** alpha, size_t num_of_alpha);
-// void vander_lagrange(double **xy_data, double **X, int ** alpha, size_t num_of_alpha);
-// void fitting_hermite(double **xy_data, double *v, double *dz_data0, double *dz_data1, double *b,
-//                      int **alpha, size_t num_of_alpha);
-// void fitting_lagrange(double **xy_data, double *v, double *b,
-//                       int ** alpha, size_t num_of_alpha);
-// void fitting_Cai(double **xy_data, double **z_knots, double *v_hat, double *b,
-//                  int **alpha, size_t num_of_alpha);
-// void fitting_ann(double **xy_data, double *v_hat);
 double predict(double *state);
 void fitting(double **xy_data, double *v_hat, double *dz_data0, double *dz_data1, double *b, double **z_knots);
 
