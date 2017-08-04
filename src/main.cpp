@@ -14,12 +14,13 @@ using namespace std;
 ofstream myfile;
 
 void bellman(double **xy_knots, double *value, double *value_last, double *policy, double *policy_last, double *price, double *price_last, double *dvalue0, double *dvalue1, size_t nmax){
-#pragma omp parallel for
+// #pragma omp parallel for
+    // printf("Optimization\n");
     for(size_t i=0; i<S; i++){
+	// printf("state = (%f, %f)\n", xy_knots[i][0], xy_knots[i][1]);
 	size_t index_other = i/num_of_knots + (i%num_of_knots)*num_of_knots;
 	double p_other = price[index_other];
 	double policy_other = policy[index_other];
-		// printf("(%zd, %zd)\n", i, index_other);
         objective_data data_init = {xy_knots[i], p_other, policy_other};
 //        if(false){
 //            double h = 1e-5;
@@ -52,14 +53,14 @@ void bellman(double **xy_knots, double *value, double *value_last, double *polic
         nlopt::opt opt(nlopt::LD_LBFGS, 2);
 //        LD_LBFGS
 //        LN_COBYLA
-        opt.set_maxtime(4.0);
-        opt.set_xtol_rel(1e-7);
+        opt.set_xtol_rel(1e-5);
 	std::vector<double> x_l(2);
-        x_l[0] = 5; x_l[1] = 0.01;
+        x_l[0] = 0; x_l[1] = 0;
         opt.set_lower_bounds(x_l);
         opt.set_min_objective(objective, &data_init);
 	std::vector<double> actions(2);
-        actions[0] = 6.1; actions[1] = .5;
+        actions[0] = price_last[i]+.001; actions[1] = policy_last[i]+.001;
+	// actions[0] = 6.5; actions[1] = .05;
         double minf;
         nlopt::result result = opt.optimize(actions, minf);
         if(isnan(-minf) || isnan(actions[0]) || isnan(actions[1]) || -minf>1000 || actions[1]<0){
@@ -77,11 +78,8 @@ void bellman(double **xy_knots, double *value, double *value_last, double *polic
     }
 }
 
-void plotting(double **xy_knots, double *value, size_t k){
-    if(k==0){
-        myfile.open("model_data.csv");
-        myfile << "x,y,v,p,inv,x1,y1,v1\n";
-    }
+void plotting(double **xy_knots, double *value, double *price, double *policy, size_t k){
+    // printf("Plotting\n");
     double *x_test, *y_test, *v_test, *p_test, *inv_test;
     x_test = new double [num_of_test];
     y_test = new double [num_of_test];
@@ -103,10 +101,22 @@ void plotting(double **xy_knots, double *value, size_t k){
         xy_test[i][1] = y_test[i / num_of_test];
     }
     for(size_t i=0; i<S_test; i++){
-        v_test[i] = predict(xy_test[i]); // V_hat(xy_test[i], value_coef, alpha_coef, num_of_coef);
-	// V_hat(xy_test[i], value_coef, alpha_coef, num_of_coef);
-        p_test[i] = V_hat(xy_test[i], price_coef, alpha_coef, num_of_coef);
-	inv_test[i] = V_hat(xy_test[i], policy_coef, alpha_coef, num_of_coef);
+	if(approx_type==2){
+	    v_test[i] = predict(xy_test[i]);
+	    if(i<S){
+		p_test[i] = price[i];
+		inv_test[i] = policy[i];
+	    }
+	    else{
+		p_test[i] = 0;
+		inv_test[i] = 0;
+	    }
+	}
+	else{
+	    v_test[i] = predict(xy_test[i]);
+	    p_test[i] = V_hat(xy_test[i], price_coef, alpha_coef, num_of_coef);
+	    inv_test[i] = V_hat(xy_test[i], policy_coef, alpha_coef, num_of_coef);
+	}
     }
     for(size_t i=0; i<S_test; i++){
         double x1 = 0;
@@ -135,6 +145,9 @@ void plotting(double **xy_knots, double *value, size_t k){
 }
 
 int main(int argv, char* argc[]){
+    auto start = std::chrono::high_resolution_clock::now();
+    myfile.open("model_data.csv");
+    myfile << "x,y,v,p,inv,x1,y1,v1\n";
     double *x_knots, *y_knots, *value, *policy, *price, *dvalue0, *dvalue1, *z;
     x_knots = new double [num_of_knots];
     y_knots = new double [num_of_knots];
@@ -157,8 +170,17 @@ int main(int argv, char* argc[]){
     }
     for(size_t i=0; i<num_of_knots; i++){
         z[i] = -cos((2*(i+1)-1)*M_PI/(2*num_of_knots));
-        x_knots[i] = (z[i]+1)*(xmax[0]-xmin[0])/2+xmin[0];
-        y_knots[i] = (z[i]+1)*(xmax[1]-xmin[1])/2+xmin[1];
+	if(approx_type==2){
+	    x_knots[i] = xmin[0] + i/double(num_of_knots-1)*(xmax[0]-xmin[0]);
+	    y_knots[i] = xmin[1] + i/double(num_of_knots-1)*(xmax[1]-xmin[1]);
+	    // x_knots[i] = (z[i]+1)*(xmax[0]-xmin[0])/2+xmin[0];
+	    // y_knots[i] = (z[i]+1)*(xmax[1]-xmin[1])/2+xmin[1];
+	}
+	else{
+	    x_knots[i] = (z[i]+1)*(xmax[0]-xmin[0])/2+xmin[0];
+	    y_knots[i] = (z[i]+1)*(xmax[1]-xmin[1])/2+xmin[1];
+	}
+	// printf("(%f, %f)\n", x_knots[i], y_knots[i]);
     }
     for(size_t i=0; i<S; i++){
         xy_knots[i][0] = x_knots[i % num_of_knots];
@@ -171,25 +193,43 @@ int main(int argv, char* argc[]){
     price_last = new double [S];
     policy_last = new double [S];
     fitting(xy_knots, value, dvalue0, dvalue1, value_coef, z_knots);
+    plotting(xy_knots, value, price, policy, -1);
     for(size_t k=0; k<Nmax; k++){
-        for(size_t i=0; i<S; i++){
-            value_last[i] = value[i];
-            price_last[i] = price[i];
-            policy_last[i] = policy[i];
-        }
+	if(k==0){
+	    for(size_t i=0; i<S; i++){
+		value_last[i] = value[i];
+		price_last[i] = 6.5;	// initial price guess
+		policy_last[i] = .05;	// initial policy guess
+	    }
+	}
+        else {
+	    for(size_t i=0; i<S; i++){
+		value_last[i] = value[i];
+		price_last[i] = price[i];
+		policy_last[i] = policy[i];
+	    }
+	}
         bellman(xy_knots, value, value_last, policy, policy_last, price, price_last, dvalue0, dvalue1, k);
         for(size_t i=0; i<S; i++){
             value[i] = value[i]*eta + (1-eta)*value_last[i];
             price[i] = price[i]*eta + (1-eta)*price_last[i];
             policy[i] = policy[i]*eta + (1-eta)*policy_last[i];
         }
-	fitting(xy_knots, value, dvalue0, dvalue1, value_coef, z_knots);
-	fitting(xy_knots, price, dvalue0, dvalue1, price_coef, z_knots);
-	fitting(xy_knots, policy, dvalue0, dvalue1, policy_coef, z_knots);
-        plotting(xy_knots, value, k);
+	if(approx_type==2){
+	    fitting(xy_knots, value, dvalue0, dvalue1, value_coef, z_knots);
+	}
+	else{
+	    fitting(xy_knots, value, dvalue0, dvalue1, value_coef, z_knots);
+	    fitting(xy_knots, price, dvalue0, dvalue1, price_coef, z_knots);
+	    fitting(xy_knots, policy, dvalue0, dvalue1, policy_coef, z_knots);
+	}
+        plotting(xy_knots, value, price, policy, k);
         printf("%zd\n", k);
     }
+    auto end = std::chrono::high_resolution_clock::now();
     printf("Finished Iterations\n");
+    printf("Objective Evaluated %f times per state\n", func_count/((double) (Nmax * S)));
+    cout << "Time " << std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count()/1000.0 << endl;
 
     delete[] x_knots;
     delete[] y_knots;

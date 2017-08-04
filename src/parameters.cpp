@@ -25,10 +25,8 @@ double *value_coef;
 double *policy_coef;
 double *price_coef;
 int **alpha_coef;
-std::string approx_type;
-std::string cai;
-std::string cheb;
-std::string ann;
+int approx_type;
+int func_count=0;
 
 
 const size_t choose(size_t n, size_t k){
@@ -41,13 +39,10 @@ const size_t choose(size_t n, size_t k){
 }
 
 __attribute__((constructor)) void initialize(){
-    approx_type = "ann";
-    cai = "cai";
-    cheb = "cheb";
-    ann = "ann";
+    approx_type = 2;		// cheb==0 cai==1 ann==2
     d = 2;
     Nmax = 100;
-    num_of_knots = 12;
+    num_of_knots = 6;
     S = num_of_knots*num_of_knots;
     num_of_test = 150;
     S_test = num_of_test*num_of_test;
@@ -65,36 +60,47 @@ __attribute__((constructor)) void initialize(){
     xmax = new double[d];
     xmax[0] = 18.0; xmax[1] = 18.0;
 
-    // if(approx_type.compare(cai)==0 || approx_type.compare(cheb)==0){
-	while(choose(coef_degree+1 + d, d)<pow(num_of_knots, d)){
-	    coef_degree += 1;
-	}
-	coef_degree = coef_degree/5*2;
-	coef_degree = 12;
-	printf("coef_degree = %zd\n", coef_degree);
-	num_of_coef = choose(coef_degree + d, d);
-	printf("num_of_coef = %zd\n", num_of_coef);
-	value_coef = new double[num_of_coef];
-	policy_coef = new double[num_of_coef];
-	price_coef = new double[num_of_coef];
-	alpha_coef = new int*[num_of_coef];
-	for(size_t i=0; i<num_of_coef; i++){
-	    alpha_coef[i] = new int[d];
-	    policy_coef[i] = 0.0;
-	    price_coef[i] = 0.0;
-	    value_coef[i] = 0.0;
-	}
-	size_t k=0;
-	for(int i=0; i<=(int)coef_degree; i++){
-	    for(int j=0; j<=(int)coef_degree; j++){
-		if(i+j<=(int)coef_degree){
-		    alpha_coef[k][0] = i;
-		    alpha_coef[k][1] = j;
-		    k+=1;
-		}
+    while(choose(coef_degree+1 + d, d)<pow(num_of_knots, d)){
+	coef_degree += 1;
+    }
+    coef_degree = coef_degree/5*2;
+    coef_degree = 10;
+    num_of_coef = choose(coef_degree + d, d);
+
+    value_coef = new double[num_of_coef];
+    policy_coef = new double[num_of_coef];
+    price_coef = new double[num_of_coef];
+    alpha_coef = new int*[num_of_coef];
+    for(size_t i=0; i<num_of_coef; i++){
+	alpha_coef[i] = new int[d];
+	policy_coef[i] = 0.0;
+	price_coef[i] = 0.0;
+	value_coef[i] = 0.0;
+    }
+    size_t k=0;
+    for(int i=0; i<=(int)coef_degree; i++){
+	for(int j=0; j<=(int)coef_degree; j++){
+	    if(i+j<=(int)coef_degree){
+		alpha_coef[k][0] = i;
+		alpha_coef[k][1] = j;
+		k+=1;
 	    }
 	}
-    // }
+    }
+    if(approx_type==0){
+	printf("fitting using cheb\n");
+    }
+    else if(approx_type==1){
+	printf("fitting using cai\n");
+    }
+    else if(approx_type==2){
+	printf("fitting using ann\n");
+    }
+    else{
+	printf("ERROR: approx_type is fucked\n");
+    }
+    printf("num_of_knots = %zd\n", num_of_knots);
+    printf("coef_degree = %zd\n", coef_degree);
     // else{
     // 	printf("Value Function Approximation with ANN\n");
     // }

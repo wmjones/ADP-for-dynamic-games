@@ -13,7 +13,7 @@ using net_type = loss_mean_squared<fc<1,
 					// fc<5,
 					// fc<5,
 					// htan<l2normalize<
-					  htan<fc<144,
+					  htan<fc<36,
 					  input<matrix<float,0,1>>
 					  >>>>;
 net_type net;
@@ -70,21 +70,21 @@ double predict(double *state){
     // if(approx_type == "cheb_hermite"){
     // 	return V_hat(state, value_coef, alpha, num_of_coef)
     // }
-    if(approx_type.compare(cheb)==0){
+    if(approx_type == 0){
 	return V_hat(state, value_coef, alpha_coef, num_of_coef);
     }
-    else if(approx_type.compare(cai)==0){
+    else if(approx_type == 1){
 	return V_hat(state, value_coef, alpha_coef, num_of_coef);
     }
-    else if(approx_type.compare(ann)==0){
-	printf("hello\n");
+    else if(approx_type == 2){
 	std::vector<matrix<float, 0, 1>> sample(1);
 	sample[0] = {(state[0] - xmin[0])/(xmax[0] - xmin[0]),
 		     (state[1] - xmin[1])/(xmax[1] - xmin[1])};
 	auto out = net(sample);
-       	// printf("%f\n", out[0]);
-	double double_out = out[0];
-	return double_out;
+	if(isnan(out[0])){
+	    printf("ann is nan at state = (%f, %f)\n", state[0], state[1]);
+	}
+	return out[0];
 	// printf("%f\n", out[0]);
 	// std::cout << out[0] << std::endl;
 	// return 0;
@@ -133,7 +133,7 @@ void fitting(double **xy_data, double *v_hat, double *dz_data0, double *dz_data1
     // 	delete[] X;
     // }
 
-    if(approx_type.compare(cheb)==0){
+    if(approx_type == 0){
 	// void fitting_lagrange(double **xy_data, double *v, double *b,
         //               int ** alpha, size_t num_of_coef)
 	Eigen::MatrixXd data(S, num_of_coef);
@@ -164,7 +164,7 @@ void fitting(double **xy_data, double *v_hat, double *dz_data0, double *dz_data1
 	delete[] X;
     }
 
-    else if(approx_type.compare(cai)==0){
+    else if(approx_type == 1){
 	// void fitting_Cai(double **xy_data, double **z_knots, double *v_hat, double *b,
         //          int **alpha, size_t num_of_coef)
 	for(size_t i=0; i<num_of_coef; i++){
@@ -180,7 +180,8 @@ void fitting(double **xy_data, double *v_hat, double *dz_data0, double *dz_data1
 	}
     }
 
-    else if(approx_type.compare(ann)==0){
+    else if(approx_type == 2){
+	net.clean();		// not sure if i should use this or not
 	std::vector<matrix<float, 0, 1>> samples(S);
 	std::vector<float> labels(S);
 
@@ -188,18 +189,23 @@ void fitting(double **xy_data, double *v_hat, double *dz_data0, double *dz_data1
 	    samples[i] = {(xy_data[i][0] - xmin[0])/(xmax[0] - xmin[0]),
 			  (xy_data[i][1] - xmin[1])/(xmax[1] - xmin[1])};
 	    labels[i] = {v_hat[i]};
-	    std::cout << "i=" << i << "\tsample=(" << samples[i](0,0) << ", "
-	    	      << samples[i](1,0) << ")\t\tlabel=" << labels[i] << std::endl;
+	    // std::cout << "i=" << i << "\tsample=(" << samples[i](0,0) << ", "
+	    // 	      << samples[i](1,0) << ")\t\tlabel=" << labels[i] << std::endl;
 	}
-
-	// trainer();
 	dnn_trainer<net_type> trainer(net);
-	trainer.set_learning_rate(0.1);
+	// trainer.set_learning_rate(0.1);
 
-	for(int i=0; i<100000; i++)
-	    trainer.train_one_step(samples, labels);
+	// for(int i=0; i<10000; i++)
+	//     trainer.train_one_step(samples, labels);
+	trainer.train(samples, labels);
 	trainer.get_net();
-	std::vector<matrix<float, 0, 1>> sample(1);
+	// for(size_t i=0; i<S; i++){
+        //     std::cout << "i=" << i << "\tsample=(" << samples[i](0,0) << ", "
+	//     	      << samples[i](1,0) << ")\t\tlabel=" << labels[i]
+	// 	      << "\tpredicted = " << net(samples[i]) << std::endl;
+	// }
+	// samples.clear();
+        // labels.clear();
 	// sample[0] = {1, 1};
 	// auto out = net(sample);
 	// return out[0];

@@ -4,14 +4,6 @@
 #include <math.h>
 #include <vector>
 
-//double g(double x){
-//    if(x<5.4){
-//        return 3*x-4;
-//    }
-//    else{
-//        return 12 + log(2-exp(16 - 3*x));
-//    }
-//}
 
 inline double g(double x){
     return 12.6/(1 + exp(4-x));
@@ -23,19 +15,13 @@ inline double D_g(double x){
 }
 
 inline double profit(double *state, double p_other, const std::vector<double> &actions){
-    // double state_tilde[2] = {state[1], state[0]};
-    // double p1 = V_hat(state_tilde, price_coef, alpha_policy_coef, num_of_policy_coef);
-    // p1 = (p1>0)?p1:0;
     return M*exp(g(state[0]) - actions[0])/(1 + exp(g(state[0])-actions[0]) + exp(g(state[1]) - p_other))*(actions[0] - c);
 }
 
 inline double expectation(double *state, double policy_other, const std::vector<double> &actions){
-    // double state_tilde[2] = {state[1], state[0]};
     double p[9];
     double x0 = actions[1];
-    // V_hat(state_tilde, policy_coef, alpha_policy_coef, num_of_policy_coef);
     double x1 = policy_other;
-    // x1 = (x1>0)?x1:0;
     double a1 = delta/(1 + alpha*x0);
     double b1 = delta/(1 + alpha*x1);
     double a2 = (1 - delta + delta*alpha*x0)/(1 + alpha*x0);
@@ -204,46 +190,20 @@ inline double expectation(double *state, double policy_other, const std::vector<
         p[8] = 0;
     }
     else{
-        printf("ERROR\n");
+        printf("ERROR: expectation reaching region it shouldn't\n");
+	printf("state = (%f, %f\n)", state[0], state[1]);
     }
     double out = 0;
     for(size_t i=0; i<9; i++){
         out += p[i];
     }
-    if (false){
-        double v0 = predict(sprime0);
-        double v1 = predict(sprime1);
-        double v2 = predict(sprime2);
-        double v3 = predict(sprime3);
-        double v4 = predict(sprime4);
-        double v5 = predict(sprime5);
-        double v6 = predict(sprime6);
-        double v7 = predict(sprime7);
-        double v8 = predict(sprime8);
-        p[0] = a1*b1*v0;
-        p[1] = a2*b1*v1;
-        p[2] = a3*b1*v2;
-        p[3] = a1*b2*v3;
-        p[4] = a2*b2*v4;
-        p[5] = a3*b2*v5;
-        p[6] = a1*b3*v6;
-        p[7] = a2*b3*v7;
-        p[8] = a3*b3*v8;
-        printf("\n");
-    }
-    if(out>1000){
-        printf("what\n");
-    }
     return out;
 }
 
 inline double D_expectation_d_x0(double *state, double policy_other, const std::vector<double> &actions){
-    // double state_tilde[2] = {state[1], state[0]};
     double p[9];
     double x0 = actions[1];
-    // predict(state_tilde, policy_coef, alpha_policy_coef, num_of_policy_coef);
     double x1 = policy_other;
-    // x1 = (x1>0)?x1:0;
     double c1 = ((1+alpha*x0)*(1+alpha*x0));
     double a1 = -alpha*delta/c1;
     double b1 = delta/(1 + alpha*x1);
@@ -413,42 +373,40 @@ inline double D_expectation_d_x0(double *state, double policy_other, const std::
         p[8] = 0;
     }
     else{
-        printf("ERROR\n");
+        printf("ERROR: derivative of expectation reaching region it shouldn't\n");
+	printf("state = (%f, %f)\n", state[0], state[1]);
     }
     double out = 0;
     for(size_t i=0; i<9; i++){
         out += p[i];
     }
-    if (false){
-        double v0 = predict(sprime0);
-        double v1 = predict(sprime1);
-        double v2 = predict(sprime2);
-        double v3 = predict(sprime3);
-        double v4 = predict(sprime4);
-        double v5 = predict(sprime5);
-        double v6 = predict(sprime6);
-        double v7 = predict(sprime7);
-        double v8 = predict(sprime8);
-        p[0] = a1*b1*v0;
-        p[1] = a2*b1*v1;
-        p[2] = a3*b1*v2;
-        p[3] = a1*b2*v3;
-        p[4] = a2*b2*v4;
-        p[5] = a3*b2*v5;
-        p[6] = a1*b3*v6;
-        p[7] = a2*b3*v7;
-        p[8] = a3*b3*v8;
-        printf("\n");
-    }
+    // if (false){
+    //     double v0 = predict(sprime0);
+    //     double v1 = predict(sprime1);
+    //     double v2 = predict(sprime2);
+    //     double v3 = predict(sprime3);
+    //     double v4 = predict(sprime4);
+    //     double v5 = predict(sprime5);
+    //     double v6 = predict(sprime6);
+    //     double v7 = predict(sprime7);
+    //     double v8 = predict(sprime8);
+    //     p[0] = a1*b1*v0;
+    //     p[1] = a2*b1*v1;
+    //     p[2] = a3*b1*v2;
+    //     p[3] = a1*b2*v3;
+    //     p[4] = a2*b2*v4;
+    //     p[5] = a3*b2*v5;
+    //     p[6] = a1*b3*v6;
+    //     p[7] = a2*b3*v7;
+    //     p[8] = a3*b3*v8;
+    //     printf("\n");
+    // }
     return out;
 }
 
 inline double D_objective_d_p0(double *state, double p_other, const std::vector<double> &actions){
-    // double state_tilde[2] = {state[1], state[0]};
     double a1 = exp(2*(g(state[0]) - actions[0]));
     double a2 = exp(g(state[0]) - actions[0]);
-    // predict(state_tilde, price_coef, alpha_policy_coef, num_of_policy_coef);
-    // p1 = (p1>0)?p1:0;
     double a3 = 1 + a2 + exp(g(state[1]) - p_other);
     return -(M*(actions[0]-c)*(a1/(a3*a3)-a2/a3) + M*a2/a3);
 }
@@ -468,5 +426,9 @@ double objective(const std::vector<double> &actions, std::vector<double> &grad, 
     }
     double pi = profit(state_ptr, p_other, actions);
     double out = -(pi - actions[1] + beta*(expectation(state_ptr, policy_other, actions)));
+    if(isnan(out)){
+	printf("state = (%f, %f)\n", state_ptr[0], state_ptr[1]);
+    }
+    func_count++;
     return out;
 }

@@ -4,10 +4,6 @@
 #include <stdio.h>
 #include <math.h>
 #include "parameters.hpp"
-#include <dlib/dnn.h>
-#include <dlib/data_io.h>
-using namespace std;
-using namespace dlib;
 
 double predict(double *state);
 void fitting(double **xy_data, double *v_hat, double *dz_data0, double *dz_data1, double *b, double **z_knots);

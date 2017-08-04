@@ -8,7 +8,6 @@
 using namespace std;
 using namespace dlib;
 
-extern std::string approx_type;
 extern size_t d;
 extern size_t Nmax;
 extern size_t num_of_knots;
@@ -32,11 +31,8 @@ extern double *value_coef;
 extern double *policy_coef;
 extern double *price_coef;
 extern int **alpha_coef;
-extern std::string approx_type;
-extern std::string cai;
-extern std::string cheb;
-extern std::string ann;
-
+extern int approx_type;
+extern int func_count;
 
 typedef struct {
     double *state;

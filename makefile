@@ -5,7 +5,7 @@ all : figs/plots.gif
 	afplay /System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/system/payment_success.aif -v .5
 
 figs/plots.gif : figs/%.jpg
-	convert -set delay '%[fx:t==0 ? 30 : 40 - t/(n-1)]' -loop 0 figs/plot%d.jpg[1-100] figs/plots.gif
+	convert -set delay '%[fx:t==0 ? 30 : 40 - t/(n-1)]' -loop 0 figs/plot%d.jpg[1-101] figs/plots.gif
 
 figs/%.jpg : model_data.csv		# not sure why this runs if all images already created
 	Rscript src/plotting.r
@@ -26,6 +26,9 @@ d : main.cpp parameters.cpp model.cpp fitting.cpp
 run : program
 	./program
 	afplay /System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/system/payment_success.aif -v .5
+
+plot : model_data.csv
+	Rscript src/plotting.r
 
 clean :
 	rm program
