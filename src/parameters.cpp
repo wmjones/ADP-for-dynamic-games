@@ -42,7 +42,7 @@ __attribute__((constructor)) void initialize(){
     approx_type = 2;		// cheb==0 cai==1 ann==2
     d = 2;
     Nmax = 100;
-    num_of_knots = 6;
+    num_of_knots = 18;
     S = num_of_knots*num_of_knots;
     num_of_test = 150;
     S_test = num_of_test*num_of_test;
@@ -64,7 +64,7 @@ __attribute__((constructor)) void initialize(){
 	coef_degree += 1;
     }
     coef_degree = coef_degree/5*2;
-    coef_degree = 10;
+    coef_degree = 12;
     num_of_coef = choose(coef_degree + d, d);
 
     value_coef = new double[num_of_coef];
@@ -89,9 +89,11 @@ __attribute__((constructor)) void initialize(){
     }
     if(approx_type==0){
 	printf("fitting using cheb\n");
+	printf("coef_degree = %zd\n", coef_degree);
     }
     else if(approx_type==1){
 	printf("fitting using cai\n");
+	printf("coef_degree = %zd\n", coef_degree);
     }
     else if(approx_type==2){
 	printf("fitting using ann\n");
@@ -100,7 +102,6 @@ __attribute__((constructor)) void initialize(){
 	printf("ERROR: approx_type is fucked\n");
     }
     printf("num_of_knots = %zd\n", num_of_knots);
-    printf("coef_degree = %zd\n", coef_degree);
     // else{
     // 	printf("Value Function Approximation with ANN\n");
     // }

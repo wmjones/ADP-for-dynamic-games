@@ -13,7 +13,7 @@ using net_type = loss_mean_squared<fc<1,
 					// fc<5,
 					// fc<5,
 					// htan<l2normalize<
-					  htan<fc<36,
+					  htan<fc<324,
 					  input<matrix<float,0,1>>
 					  >>>>;
 net_type net;
@@ -195,9 +195,9 @@ void fitting(double **xy_data, double *v_hat, double *dz_data0, double *dz_data1
 	dnn_trainer<net_type> trainer(net);
 	// trainer.set_learning_rate(0.1);
 
-	// for(int i=0; i<10000; i++)
-	//     trainer.train_one_step(samples, labels);
-	trainer.train(samples, labels);
+	for(int i=0; i<5000; i++)
+	    trainer.train_one_step(samples, labels);
+	// trainer.train(samples, labels);
 	trainer.get_net();
 	// for(size_t i=0; i<S; i++){
         //     std::cout << "i=" << i << "\tsample=(" << samples[i](0,0) << ", "

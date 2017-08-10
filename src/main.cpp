@@ -15,8 +15,8 @@ ofstream myfile;
 
 void bellman(double **xy_knots, double *value, double *value_last, double *policy, double *policy_last, double *price, double *price_last, double *dvalue0, double *dvalue1, size_t nmax){
 // #pragma omp parallel for
-    // printf("Optimization\n");
     for(size_t i=0; i<S; i++){
+	// printf("Optimization[%zd]\n", i);
 	// printf("state = (%f, %f)\n", xy_knots[i][0], xy_knots[i][1]);
 	size_t index_other = i/num_of_knots + (i%num_of_knots)*num_of_knots;
 	double p_other = price[index_other];
@@ -101,21 +101,14 @@ void plotting(double **xy_knots, double *value, double *price, double *policy, s
         xy_test[i][1] = y_test[i / num_of_test];
     }
     for(size_t i=0; i<S_test; i++){
-	if(approx_type==2){
-	    v_test[i] = predict(xy_test[i]);
-	    if(i<S){
-		p_test[i] = price[i];
-		inv_test[i] = policy[i];
-	    }
-	    else{
-		p_test[i] = 0;
-		inv_test[i] = 0;
-	    }
+	v_test[i] = predict(xy_test[i]);
+	if(i<S){
+	    p_test[i] = price[i];
+	    inv_test[i] = policy[i];
 	}
 	else{
-	    v_test[i] = predict(xy_test[i]);
-	    p_test[i] = V_hat(xy_test[i], price_coef, alpha_coef, num_of_coef);
-	    inv_test[i] = V_hat(xy_test[i], policy_coef, alpha_coef, num_of_coef);
+	    p_test[i] = 0;
+	    inv_test[i] = 0;
 	}
     }
     for(size_t i=0; i<S_test; i++){
@@ -162,19 +155,19 @@ int main(int argv, char* argc[]){
     for(size_t i=0; i<S; i++){
         xy_knots[i] = new double [d];
         z_knots[i] = new double [d];
-        value[i] = 0;
 	dvalue0[i] = 0;
 	dvalue1[i] = 0;
-        policy[i] = 0;
-        price[i] = 0;
+	value[i] = 0;		// inital value function
+        policy[i] = 0;		// inital investment guess
+        price[i] = 6.5;		// initial price guess
     }
     for(size_t i=0; i<num_of_knots; i++){
         z[i] = -cos((2*(i+1)-1)*M_PI/(2*num_of_knots));
 	if(approx_type==2){
-	    x_knots[i] = xmin[0] + i/double(num_of_knots-1)*(xmax[0]-xmin[0]);
-	    y_knots[i] = xmin[1] + i/double(num_of_knots-1)*(xmax[1]-xmin[1]);
-	    // x_knots[i] = (z[i]+1)*(xmax[0]-xmin[0])/2+xmin[0];
-	    // y_knots[i] = (z[i]+1)*(xmax[1]-xmin[1])/2+xmin[1];
+	    x_knots[i] = (z[i]+1)*(xmax[0]-xmin[0])/2+xmin[0];
+	    y_knots[i] = (z[i]+1)*(xmax[1]-xmin[1])/2+xmin[1];
+	    // x_knots[i] = xmin[0] + i/double(num_of_knots-1)*(xmax[0]-xmin[0]);
+	    // y_knots[i] = xmin[1] + i/double(num_of_knots-1)*(xmax[1]-xmin[1]);
 	}
 	else{
 	    x_knots[i] = (z[i]+1)*(xmax[0]-xmin[0])/2+xmin[0];
@@ -195,19 +188,10 @@ int main(int argv, char* argc[]){
     fitting(xy_knots, value, dvalue0, dvalue1, value_coef, z_knots);
     plotting(xy_knots, value, price, policy, -1);
     for(size_t k=0; k<Nmax; k++){
-	if(k==0){
-	    for(size_t i=0; i<S; i++){
-		value_last[i] = value[i];
-		price_last[i] = 6.5;	// initial price guess
-		policy_last[i] = .05;	// initial policy guess
-	    }
-	}
-        else {
-	    for(size_t i=0; i<S; i++){
-		value_last[i] = value[i];
-		price_last[i] = price[i];
-		policy_last[i] = policy[i];
-	    }
+	for(size_t i=0; i<S; i++){
+	    value_last[i] = value[i];
+	    price_last[i] = price[i];
+	    policy_last[i] = policy[i];
 	}
         bellman(xy_knots, value, value_last, policy, policy_last, price, price_last, dvalue0, dvalue1, k);
         for(size_t i=0; i<S; i++){
