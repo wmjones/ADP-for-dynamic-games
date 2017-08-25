@@ -41,12 +41,12 @@ const size_t choose(size_t n, size_t k){
 __attribute__((constructor)) void initialize(){
     approx_type = 2;		// cheb==0 cai==1 ann==2
     d = 2;
-    Nmax = 100;
+    Nmax = 5;
     num_of_knots = 18;
+    coef_degree = 14;
     S = num_of_knots*num_of_knots;
     num_of_test = 150;
     S_test = num_of_test*num_of_test;
-    coef_degree=0;
     M = 5.0;
     beta = 0.925;
     delta = 0.7;
@@ -60,11 +60,11 @@ __attribute__((constructor)) void initialize(){
     xmax = new double[d];
     xmax[0] = 18.0; xmax[1] = 18.0;
 
-    while(choose(coef_degree+1 + d, d)<pow(num_of_knots, d)){
-	coef_degree += 1;
-    }
-    coef_degree = coef_degree/5*2;
-    coef_degree = 12;
+    // while(choose(coef_degree+1 + d, d)<pow(num_of_knots, d)){
+    // 	coef_degree += 1;
+    // }
+    // coef_degree = coef_degree/5*2;
+
     num_of_coef = choose(coef_degree + d, d);
 
     value_coef = new double[num_of_coef];
@@ -90,10 +90,12 @@ __attribute__((constructor)) void initialize(){
     if(approx_type==0){
 	printf("fitting using cheb\n");
 	printf("coef_degree = %zd\n", coef_degree);
+	printf("num_of_coef = %zd\n", num_of_coef);
     }
     else if(approx_type==1){
 	printf("fitting using cai\n");
 	printf("coef_degree = %zd\n", coef_degree);
+	printf("num_of_coef = %zd\n", num_of_coef);
     }
     else if(approx_type==2){
 	printf("fitting using ann\n");

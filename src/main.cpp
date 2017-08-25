@@ -59,7 +59,7 @@ void bellman(double **xy_knots, double *value, double *value_last, double *polic
         opt.set_lower_bounds(x_l);
         opt.set_min_objective(objective, &data_init);
 	std::vector<double> actions(2);
-        actions[0] = price_last[i]+.001; actions[1] = policy_last[i]+.001;
+        actions[0] = price_last[i]+.0001; actions[1] = policy_last[i]+.0001;
 	// actions[0] = 6.5; actions[1] = .05;
         double minf;
         nlopt::result result = opt.optimize(actions, minf);
@@ -101,15 +101,15 @@ void plotting(double **xy_knots, double *value, double *price, double *policy, s
         xy_test[i][1] = y_test[i / num_of_test];
     }
     for(size_t i=0; i<S_test; i++){
-	v_test[i] = predict(xy_test[i]);
-	if(i<S){
-	    p_test[i] = price[i];
-	    inv_test[i] = policy[i];
-	}
-	else{
-	    p_test[i] = 0;
-	    inv_test[i] = 0;
-	}
+    	v_test[i] = predict(xy_test[i]);
+    	if(i<S){
+    	    p_test[i] = price[i];
+    	    inv_test[i] = policy[i];
+    	}
+    	else{
+    	    p_test[i] = -999;
+    	    inv_test[i] = -999;
+    	}
     }
     for(size_t i=0; i<S_test; i++){
         double x1 = 0;
@@ -164,10 +164,10 @@ int main(int argv, char* argc[]){
     for(size_t i=0; i<num_of_knots; i++){
         z[i] = -cos((2*(i+1)-1)*M_PI/(2*num_of_knots));
 	if(approx_type==2){
-	    x_knots[i] = (z[i]+1)*(xmax[0]-xmin[0])/2+xmin[0];
-	    y_knots[i] = (z[i]+1)*(xmax[1]-xmin[1])/2+xmin[1];
-	    // x_knots[i] = xmin[0] + i/double(num_of_knots-1)*(xmax[0]-xmin[0]);
-	    // y_knots[i] = xmin[1] + i/double(num_of_knots-1)*(xmax[1]-xmin[1]);
+	    // x_knots[i] = (z[i]+1)*(xmax[0]-xmin[0])/2+xmin[0];
+	    // y_knots[i] = (z[i]+1)*(xmax[1]-xmin[1])/2+xmin[1];
+	    x_knots[i] = xmin[0] + i/double(num_of_knots-1)*(xmax[0]-xmin[0]);
+	    y_knots[i] = xmin[1] + i/double(num_of_knots-1)*(xmax[1]-xmin[1]);
 	}
 	else{
 	    x_knots[i] = (z[i]+1)*(xmax[0]-xmin[0])/2+xmin[0];
@@ -185,6 +185,17 @@ int main(int argv, char* argc[]){
     value_last = new double [S];
     price_last = new double [S];
     policy_last = new double [S];
+    // for(size_t i=0; i<S; i++){
+    // 	value[i] = sin((xy_knots[i][0]-xmin[0])/(xmax[0]-xmin[0])*2*M_PI) +
+    // 	           sin((xy_knots[i][1]-xmin[1])/(xmax[1]-xmin[1])*2*M_PI);
+    //     // value[i] = (((xy_knots[i][0]>xy_knots[i][1])?xy_knots[i][0]:xy_knots[i][1])<12)?
+    // 	//     -1:
+    // 	//     (xy_knots[i][0]-xmin[0])/(xmax[0]-xmin[0])+(xy_knots[i][1]-xmin[1])/(xmax[1]-xmin[1]);
+    // 	// (xy_knots[i][0]-xmin[0])/(xmax[0]-xmin[0])+(xy_knots[i][1]-xmin[1])/(xmax[1]-xmin[1])
+
+    // 	policy[i]=value[i];
+    //     price[i] = 6.5;		// initial price guess
+    // }
     fitting(xy_knots, value, dvalue0, dvalue1, value_coef, z_knots);
     plotting(xy_knots, value, price, policy, -1);
     for(size_t k=0; k<Nmax; k++){

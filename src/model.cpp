@@ -5,14 +5,24 @@
 #include <vector>
 
 
+// inline double g(double x){
+//     return 12.6/(1 + exp(4-x));
+// }
+
+// inline double D_g(double x){
+//     double a1 = exp(4-x);
+//     return 12.6*a1/((1+a1)*(1+a1));
+// }
+
 inline double g(double x){
-    return 12.6/(1 + exp(4-x));
+    return 14.7/(1 + exp(4-1.2*x))-2;
 }
 
-inline double D_g(double x){
-    double a1 = exp(4-x);
-    return 12.6*a1/((1+a1)*(1+a1));
-}
+// inline double D_g(double x){
+//     double a1 = exp(4-x);
+//     return 14.7*a1/((1+a1)*(1+a1));
+// }
+
 
 inline double profit(double *state, double p_other, const std::vector<double> &actions){
     return M*exp(g(state[0]) - actions[0])/(1 + exp(g(state[0])-actions[0]) + exp(g(state[1]) - p_other))*(actions[0] - c);

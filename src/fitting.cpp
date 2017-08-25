@@ -1,6 +1,6 @@
 #include <math.h>
-#include <fstream>
 #include <stdio.h>
+#include <fstream>
 #include <eigen3/Eigen/Dense>
 #include "parameters.hpp"
 #include "fitting.hpp"
@@ -10,14 +10,17 @@
 using namespace std;
 using namespace dlib;
 using net_type = loss_mean_squared<fc<1,
-					// fc<5,
-					// fc<5,
-					// htan<l2normalize<
-					  htan<fc<324,
-					  input<matrix<float,0,1>>
-					  >>>>;
+				      relu<fc<10,
+				      relu<fc<10,
+				      relu<fc<10,
+				      relu<fc<10,
+				      relu<fc<10,
+				      // htan<fc<100,
+				      input<matrix<float,0,1>>
+					      >>>>>>>>>>>>;
 net_type net;
-
+// double v_min;
+// double v_max;
 
 // void vander_hermite(double **xy_data, double **X, int ** alpha, size_t num_of_alpha){
 //     double z[d];
@@ -78,12 +81,13 @@ double predict(double *state){
     }
     else if(approx_type == 2){
 	std::vector<matrix<float, 0, 1>> sample(1);
-	sample[0] = {(state[0] - xmin[0])/(xmax[0] - xmin[0]),
-		     (state[1] - xmin[1])/(xmax[1] - xmin[1])};
+	sample[0] = {(state[0] - xmin[0])/(xmax[0] - xmin[0])*2-1,
+		     (state[1] - xmin[1])/(xmax[1] - xmin[1])*2-1};
 	auto out = net(sample);
 	if(isnan(out[0])){
 	    printf("ann is nan at state = (%f, %f)\n", state[0], state[1]);
 	}
+	// return out[0]*(v_max-v_min)+v_min;
 	return out[0];
 	// printf("%f\n", out[0]);
 	// std::cout << out[0] << std::endl;
@@ -94,7 +98,7 @@ double predict(double *state){
     }
 }
 
-// Need to fix args for hermite fitting
+
 void fitting(double **xy_data, double *v_hat, double *dz_data0, double *dz_data1, double *b, double **z_knots){
     // if(approx_type == "cheb_hermite"){
     // 	// void fitting_hermite(double **xy_data, double *v_hat,
@@ -182,20 +186,26 @@ void fitting(double **xy_data, double *v_hat, double *dz_data0, double *dz_data1
 
     else if(approx_type == 2){
 	net.clean();		// not sure if i should use this or not
+	dlib::rand rnd(time(0));
 	std::vector<matrix<float, 0, 1>> samples(S);
 	std::vector<float> labels(S);
 
+	// v_max = *std::max_element(v_hat, v_hat+S);
+	// v_min = *std::min_element(v_hat, v_hat+S)-1e-5;
 	for(size_t i=0; i<S; i++){
-	    samples[i] = {(xy_data[i][0] - xmin[0])/(xmax[0] - xmin[0]),
-			  (xy_data[i][1] - xmin[1])/(xmax[1] - xmin[1])};
+	    samples[i] = {(xy_data[i][0] - xmin[0])/(xmax[0] - xmin[0])*2-1,
+			  (xy_data[i][1] - xmin[1])/(xmax[1] - xmin[1])*2-1};
+	    // labels[i] = {(v_hat[i]-v_min)/(v_max-v_min)};
 	    labels[i] = {v_hat[i]};
 	    // std::cout << "i=" << i << "\tsample=(" << samples[i](0,0) << ", "
-	    // 	      << samples[i](1,0) << ")\t\tlabel=" << labels[i] << std::endl;
+	    // 	      << samples[i](1,0) << ")\t\tlabel=" << v_hat[i] << std::endl;
 	}
-	dnn_trainer<net_type> trainer(net);
-	// trainer.set_learning_rate(0.1);
+	// printf("(%f, %f)\n", v_max, v_min);
+	// dnn_trainer<net_type> trainer(net);
+	dnn_trainer<net_type, sgd> trainer(net, sgd(0.0005, 0.9));
+	trainer.set_learning_rate(0.01);
 
-	for(int i=0; i<5000; i++)
+	for(int i=0; i<10000; i++)
 	    trainer.train_one_step(samples, labels);
 	// trainer.train(samples, labels);
 	trainer.get_net();
