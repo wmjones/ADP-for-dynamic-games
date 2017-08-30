@@ -14,4 +14,4 @@ g2 <- function(x){
 Continuous_g <- sapply(x,g2)
 data <- data.frame(x,Discrete_g,Continuous_g)
 plot <- ggplot(aes(x=x), data=data) + geom_line(aes(y=Discrete_g, colour="Discrete_g")) + geom_line(aes(y=Continuous_g, colour = "Continuous_g")) + xlab(expression(omega)) + ylab(expression(g(omega)))
-ggsave(".plot_g.png", width=4,height=4)
+ggsave("plot_g.png", width=6,height=4)
