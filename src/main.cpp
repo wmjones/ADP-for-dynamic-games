@@ -14,7 +14,7 @@ using namespace std;
 ofstream myfile;
 
 void bellman(double **xy_knots, double *value, double *value_last, double *policy, double *policy_last, double *price, double *price_last, double *dvalue0, double *dvalue1, size_t nmax){
-// #pragma omp parallel for
+#pragma omp parallel for
     for(size_t i=0; i<S; i++){
 	// printf("Optimization[%zd]\n", i);
 	// printf("state = (%f, %f)\n", xy_knots[i][0], xy_knots[i][1]);

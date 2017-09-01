@@ -59,7 +59,7 @@
 
 The analysis of dynamic industrial organization (I.O.) models is limited by the computational burden of computing equilibrium policies. These policies are typically computed by solving for the fixed point of a function whose domain is a subset of $\mathbb{R}^n$, where $n$ is the dimension of the state space \citep{1992_Pakes_McGuire_NBER}. In dynamic I.O. models, the dimension of the state space is typically the number of potentially active firms. In the \citet{1995_Erickson_Pakes_RES} framework, each firm's state is an element of a discrete grid with $m$ possible values. If we impose that the policy functions are symmetric, then the number of elements in the state space grows exponentially in the number of states per firm. Additionally, if there are multiple decision variables, the number of objective function evaluations required to find the optimal policy grows exponentially in the number of decision variables. These curses of dimensionality in the state and action spaces limit the applications that the \citet{1995_Erickson_Pakes_RES} framework can be applied to (\cite{2001_Pakes_McGuire_RAND, 2008_Weintraub_Benkard_VanRoy_Econometrica, 2007_Doraszelski_Judd, 2011_Aguirregabiria_Nevo_working}).
 
-I show adaptations to the existing methodology that may circumvent these computational problems for Markov Perfect models in which the size of the state space or action space is large. This is because my adaptations are able to overcome the issue with approximating a highly non-linear or even discontinuous value function and thus allow the algorithm to use a small subset of the state space to approximate the rest of the value function.
+I show adaptations to the existing methodology that circumvent these computational problems for Markov Perfect models in which the size of the state space or action space is large. This is because my adaptations are able to overcome the issue with approximating a highly non-linear or even discontinuous value function and thus allow the algorithm to use a small subset of the state space to approximate the rest of the value function.
 
 In this paper, I show methods for reducing the computational cost imposed by the curse of dimensionality in the action and state space that occurs when solving for a Markov Perfect Equilibrium (MPE). The rest of the paper is organized as follows. In \hyperref[prelit]{Section \ref{prelit}}, I outline the dynamic industry model and describe the relationship between my work and previous literature. In  \hyperref[action]{Section \ref{action}}, I show methods for avoiding the curse of dimensionality in the action space. In \hyperref[state]{Section \ref{state}}, I show methods for avoiding the curse of dimensionality in the state space, the difference between using multidimensional Chebyshev polynomials and using Artificial Neural Nets (ANN) for approximation, and issues that arise when trying to use the gradient of the value function for approximations. Finally, \hyperref[con]{Section \ref{con}} presents conclusions and directions for future research.
 
@@ -130,7 +130,9 @@ Firm j's value function when in industry state $S$ will be expressed by
   V_j(S)=\max_{\mu_j \in \Gamma(S)} \pi(S, \mu_j, \mu_{-j}) + \beta\mathbb{E}[V(S')|S,\mu_{j},\mu_{-j})]
 \end{equation*}
 
-where $\mu_j$ is the policy of firm j which will could include the pricing, investment, and entry or exit decision, $\Gamma(S)$ is the set of feasible actions in state $S$, $\mu_{-j}$ is the policies of all other firms other than firm j, and $S'$ is the state transitioned to conditional on $S,\mu_{j}$ and $\mu_{-j}$.
+where $\mu_j$ is the policy of firm j which will could include the pricing, investment, and entry or exit decision, $\Gamma(S)$ is the set of feasible actions in state $S$, $\mu_{-j}$ is a vector containing the policies of all other firms other than firm j, and $S'$ is the state transitioned to conditional on $S,\mu_{j}$ and $\mu_{-j}$.
+
+\subsection{Numerical Example}
 
 Throughout this paper I will refer to a numerical example that is the same as the example used in \citet{2012_Doraszelski_Judd_QuanEcon}. The example is a simplified version of the Pakes McGuire quality ladder model \citep{2012_Doraszelski_Judd_QuanEcon}. I will focus on the case where there are two firms choosing price and investment. The state variable $S=\{\omega_1,\omega_2\}$ represents the vertically differentiated quality of their product. Let $\omega_j \in \{1, \dots ,18 \}$ and the approximation nodes $S_i=\{\omega_{1,i},\omega_{2,i}\}=\{\floor*{\frac{i}{18}},i \mod 18\}$ for $i=1,\dots,324$. Consumer l's utility function for product j is given by $u_{lj}=g(\omega_j) - p_j + \epsilon_{lj}$ where $\epsilon_{lj}$ is an extreme type 1 error. The function $g(\omega)$ maps the discrete states, $\omega_j$, to the quality consumers perceive for product j. Both \citet{1992_Pakes_McGuire_NBER} and \citet{2012_Doraszelski_Judd_QuanEcon} used the function
 
@@ -142,7 +144,7 @@ Throughout this paper I will refer to a numerical example that is the same as th
   \end{cases}
 \end{equation*}
 
-however as \hyperref[plot_g]{Figure 1} shows this function is not continuous between 5 and 6. This causes a problem when attempting to approximate the model with a continuous state space. Therefore I will use the function
+however as \hyperref[plot_g]{Figure 1} shows this function is not defined for a range between 5 and 6. This causes a problem when attempting to approximate the model with a continuous state space. Therefore I will use the function
 
 \begin{equation*}
   g(\omega) = \frac{14.7}{1+\text{exp}(4-1.2\omega)}
@@ -166,7 +168,7 @@ The single period objective function for firm 1 as a function of the industry st
 In order to calculate the expected future value for a policy $\mu_1$ let
 
 \begin{equation*}
-  \mathbb{E}[\hat{V}(S'|S,\mu_{1},\mu_{2})] = \sum_{\omega'_1=1}^m \sum_{\omega'_2=1}^m \hat{V}(\{\omega'_1,\omega'_2\}) \text{Pr}(\omega'_1|\omega_1,x_{1}) \text{Pr}(\omega'_2|\omega_2,x_{2})
+  \mathbb{E}[\hat{V}(S')|S,\mu_{1},\mu_{2}] = \sum_{\omega'_1=1}^m \sum_{\omega'_2=1}^m \hat{V}(\{\omega'_1,\omega'_2\}) \text{Pr}(\omega'_1|\omega_1,x_{1}) \text{Pr}(\omega'_2|\omega_2,x_{2})
 \end{equation*}
 
 Where the probability of transitioning to the state $\omega'$ given investment $x$ and current state $\omega$ is given by
@@ -189,10 +191,10 @@ Where the probability of transitioning to the state $\omega'$ given investment $
 \end{equation*}
 
 \begin{equation*}
-  \text{Pr}(\omega'|L,x) =
+  \text{Pr}(\omega'|m,x) =
   \begin{cases}
-    \frac{1-\delta+\alpha x}{1+\alpha x} & \text{if } \omega'=L\\
-    \frac{\delta}{1+\alpha x} & \text{if } \omega'=L-1
+    \frac{1-\delta+\alpha x}{1+\alpha x} & \text{if } \omega'=m\\
+    \frac{\delta}{1+\alpha x} & \text{if } \omega'=m-1
   \end{cases}
 \end{equation*}
 
@@ -206,7 +208,7 @@ where $\delta$ represents the probability that the outside alternative increases
 The \citet{1992_Pakes_McGuire_NBER} algorithm is an iterative backward solution method which uses numbers stored in memory from the previous iteration to calculate an update to those numbers and runs until the updated numbers satisfy a convergence condition. At the start of the algorithm $N$ approximation nodes, $\{S_i\}_{i=1}^N$, must be chosen. Each node represents a possible industry state that can be visited in the model. It is also necessary to initialize an $\epsilon>0$ for the convergence criterion and to initialize the value function.
 % If the value function is initialized at $0$ then the backward solution method can be interpreted as the limit of a finite stage game where the final period is valued at $0$. (maybe not for pakes mcguire)
 
-The algorithm uses the assumption that firms use symmetric strategies so that only one value function needs to be calculated. For notational purposes I will denote the firm for which the value function is calculated as firm 1. Since we are interested in finding only symmetric MPE, the \citet{1992_Pakes_McGuire_NBER} algorithm uses the calculation of firm 1's policies in iteration k-1 to determine the policies of all other firms in iteration k. For example, in the numerical example the pricing policy for firm 2 in state $S_i$, and iteration k is represented as $p^{k}_{i,2}=p^{k-1}_{i',1}$ where $i'$ is such that if $S_i=\{\omega_1,\omega_2\}$ then $S_{i'}=\{\omega_2,\omega_1\}$.
+The algorithm uses the assumption that firms use symmetric strategies so that only one value function needs to be calculated. For notational purposes I will denote the firm for which the value function is calculated as firm 1. Since we are interested in finding only symmetric MPE, the \citet{1992_Pakes_McGuire_NBER} algorithm uses the calculation of firm 1's policies in iteration k-1 to determine the policies of all other firms in iteration k. For example, in the numerical example the pricing and investment policy for firm 2 in state $S_i$, and iteration k is represented as $\mu^k_{i,-1}=\{p^{k}_{i,2},x^k_{i,2}\}=\{p^{k-1}_{i',1},x^{k-1}_{i',1}\}$ where $i'$ is such that if $S_i=\{\omega_1,\omega_2\}$ then $S_{i'}=\{\omega_2,\omega_1\}$.
 
 More generally, for each iteration $k$ the algorithm uses firm 1's policy from last iteration, $\mu^{k-1}_1$ to determine the policy that other firms will choose, $\mu^k_{-1}$, and then calculates $\mu^k_1$ based on $\mu^k_{-1}$ and $v_i^{k-1}$. Then the algorithm checks a convergence condition by evaluating the distance between the previous iterations value function and the current value function.
 
@@ -252,7 +254,7 @@ Thus in order to develop richer models of industry dynamics that are a closer re
 
 In order to reduce the computational cost caused by a curse of dimensionality in the action space it is necessary to either reduce the number of decision variables, or reduce the number of function evaluations required to find the policy that maximizes the objective. In the \citet{1995_Erickson_Pakes_RES} framework it is common to use a static-dynamic breakdown to reduce the number of decision variables. A static-dynamic breakdown means that the model is constructed in such a way that in the dynamic industry it is optimal for firms to choose the same prices that they would choose in a single period model. If this is the case then the profitability for firm 1 in each state only has to be computed once and then stored in memory. In some settings it is not desirable to use a static-dynamic breakdown since the pricing decision does influence the dynamics of the industry. This is the case in dynamic network industries where the price of a product in a period t affects the market share for each firm in t+1 \citep{2009_Chen_Doraszelski_Harrington, 2006_Mitchell_Skrzypacz, 2006_Chen_Doraszelski}.
 
-If there several decision variables, a high degree of accuracy is required, or the run time is too large it is advantageous to use more sophisticated methods to find the optimal policy in a state. The first issue that arises is if the decision variable is continuous. Exit and entry decisions are naturally modeled as a discrete 0 for exit and 1 for remaining in the industry, but many other policy decisions, such as how much to invest, or the price charged for a product are most naturally modeled as a continuous variable. Since in the \citet{1995_Erickson_Pakes_RES} framework the state space is discretized in order for $H(S)$ to be well defined it is necessary to map continuous actions to discrete future states. This is because the objective function $f(S,\mu)$ contains the evaluation of the expected value of future payoffs conditional on the current state and actions. In this expectation the value function $V : S' \in \{S_i^N\} \rightarrow \mathbb{R}$ can only be evaluated if $S' \in \{S_i^N\}$ where $S'=h(S,\mu)$. The transition function $h(S,\mu)$ maps the policy $\mu$ and discrete states $S$ to discrete states $S'$. In the numerical example used in this paper the transition function represents the change in quality a firm receives as a function of their current quality and level of investment. The transition function is restricted to increasing quality by one level, remaining at the current level, or decreasing quality by one level and the probability of each event is conditional on the level of investment, $x$.
+If there several decision variables, a high degree of accuracy is required, or the run time is too large it is advantageous to use more sophisticated methods to find the optimal policy in a state. The first issue that arises is if the decision variable is continuous. Exit and entry decisions are naturally modeled as a discrete 0 for exit and 1 for remaining in the industry, but many other policy decisions, such as how much to invest, or the price charged for a product are most naturally modeled as a continuous variable. Since in the \citet{1995_Erickson_Pakes_RES} framework the state space is discretized in order for $H(S)$ from \hyperref[runtime]{(1)} to be well defined it is necessary to map continuous actions to discrete future states. This is because the objective function $f(S,\mu)$ contains the evaluation of the expected value of future payoffs conditional on the current state and actions. In this expectation the value function $V : S' \in \{S_i^N\} \rightarrow \mathbb{R}$ can only be evaluated if $S' \in \{S_i^N\}$ where $S'=h(S,\mu)$. The transition function $h(S,\mu)$ maps the policy $\mu$ and discrete states $S$ to discrete states $S'$. In the numerical example used in this paper the transition function represents the change in quality a firm receives as a function of their current quality and level of investment. The transition function is restricted to increasing quality by one level, remaining at the current level, or decreasing quality by one level and the probability of each event is conditional on the level of investment, $x$.
 
 In order to discuss numerical optimization methods for it is helpful to rewrite the right hand side of the Bellman equation as
 
@@ -265,7 +267,7 @@ In order to discuss numerical optimization methods for it is helpful to rewrite 
   \end{aligned}
 \end{equation}
 
-The most straight forward approach to solving this problem is to use a simple grid search. To do the grid search you choose a grid for each element in the vector $\mu$ and then evaluate $f$ at each point in the grid and then choose the action that has the largest value. While this method will find the global maximum of $f$ up to the accuracy limit imposed by how fine the grid is, this method requires far too many function evaluations to be used in many contexts.
+The most straight forward approach to solving this problem is to use a simple grid search. To do the grid search you choose a grid for each element in the vector $\mu$ and then evaluate $f$ at each point in the grid and then choose the action that has the largest value. While this method will find the global maximum of $f$ up to the accuracy limit imposed by how fine the grid is, this method requires far too many function evaluations to be used in most contexts.
 
 The numerical analysis literature has produced many algorithms that have far better convergence rates to the optimal action and there are many efficiently implemented software packages that makes using these algorithms very easy. However, the run time required to find the optimal action varies significantly based on which method was chosen, the problem's structure, and the specific way that the algorithm was implemented in a software package.
 
@@ -314,14 +316,14 @@ If $S_{min}=-1$ and $S_{max}=1$ then the first four polynomials will be
   \caption{The first four Chebyshev polynomials}
 \end{figure}
 
-and then approximation can be written as $\hat{V}(S;b)=\sum_{k=0}^n b_k T_k(S)$.
+and then approximation can be written as $\hat{V}(S;\boldsymbol{b})=\sum_{k=0}^n b_k T_k(S)$.
 When interpolating a function with Chebyshev polynomials it is important to choose the approximation nodes based off of the roots of the polynomials. The Chebyshev nodes for one dimension are given by $S_i=(z_i+1)(S_{max}-S_{min})/2+S_{min}$ and $z_i=-\text{cos}((2i-1)\pi/(2m))$ where $m$ is the number of approximation nodes. In order to approximate the function $v(S)$ using the Lagrange data $\{S_i,v_i\}_{i=1}^N$, where $v_i=v(S_i)$, it is necessary to solve for the coefficients, $b$, using
 
 \begin{equation*}
   \min_{\boldsymbol{b}}\sum_{i=1}^N (\hat{V}(S_i;\boldsymbol{b})-v_i)^2
 \end{equation*}
 
-This problem can be solved easily with OLS or with the Chebyshev Approximation Formula. This approximation method has a few cases where it performs poorly. One case where the approximation is poor is when $N$ is too small. For a fixed $N$ the approximation can be improved by fittiting the polynomial approximation using Hermite data. Hermite data consists of the approximation node, the function evaluated at the approximation node and also the gradient of the function evaluated at the approximation node. In order to fit the Chebyshev polynomial using Hermite data, $\{S_i,v_i,d_i\}_{i=1}^N$, where $d_i=\frac{d v(S_i)}{d S}$, the coefficients are found by solving the following OLS problem.
+This problem can be solved easily with OLS or with the closed form Chebyshev Approximation Formula. This approximation method has a few cases where it performs poorly. One case where the approximation is poor is when $N$ is too small. For a fixed $N$ the approximation can be improved by fittiting the polynomial approximation using Hermite data. Hermite data consists of the approximation node, the function evaluated at the approximation node and also the gradient of the function evaluated at the approximation node. In order to fit the Chebyshev polynomial using Hermite data, $\{S_i,v_i,d_i\}_{i=1}^N$, where $d_i=\frac{d v(S_i)}{d S}$, the coefficients are found by solving the following OLS problem.
 
 \begin{equation*}
   \min_{\boldsymbol{b}} \sum_{i=1}^N\bigg((\hat{V}(S_i;\boldsymbol{b})-v_i)^2 + (\frac{\partial \hat{V}(S_i;\boldsymbol{b})}{\partial S} - d_i)^2 \bigg)
@@ -342,7 +344,7 @@ By incorporating the gradient information a function can be approximated to a gi
   \caption{Lagrange and Hermite Chebyshev approximation of Sin(x)}
 \end{figure}
 
-Another case where polynomial approximations perform poorly is when there are large discontinuities or non-linearities in the function that is being approximated. When trying to approximate a discontinuous function polynomial approximations can often show the Gibbs phenomenon which is when the approximating polynomial overshooting or undershooting the function around a jump discontinuity. This overshooting/undershooting persists even when the number of approximation nodes increases. This can be seen in \hyperref[ref_Cheb_Ind_Func]{Figure 4} when Lagrange and Hermite Chebyshev polynomials are used to approximate the function $f(x)$ with 10 approximation nodes.
+Another case where polynomial approximations perform poorly is when there are large discontinuities or non-linearities in the function that is being approximated. When trying to approximate a discontinuous function polynomial approximations can often show the Gibbs phenomenon which is when the approximating polynomial overshoots or undershoots the function around a jump discontinuity. This overshooting/undershooting persists even when the number of approximation nodes increases. This can be seen in \hyperref[ref_Cheb_Ind_Func]{Figure 4} when Lagrange and Hermite Chebyshev polynomials are used to approximate the function $f(x)$ with 10 approximation nodes.
 
 \begin{equation}
   \label{ind_func}
@@ -370,7 +372,7 @@ In order to overcome this issue it is necessary to use an approximation techinqu
   \caption{ANN approximation of f(x)}
 \end{figure}
 
-\hyperref[ref_ANN_Ind_Func]{Figure 5} shows how a ANN with a single hidden layer with 10 nodes was able to approximate the function without the same issues that Chebyshev polynomials had. The graph was created using the same ANN but trained 5 times and each time starting out with a different set of random initial parameters. This figure also shows a drawback of using ANN, which is that they sometimes get stuck in local minimum. This can be seen with the fifth approximation. \citet{ann_radial} showed that using different network structures such as a Radial Basis Function Network or a Wavelet Neural Network can improve the accuracy of ANN by reducing the frequency that the ANN gets stuck in a local minimum. \citet{ann_disc} show that ANN can approximate any discontinuous function with a single hidden layer and \citet{ann_herm} also show that the Hermite approximation problem can be solved using ANN.
+\hyperref[ref_ANN_Ind_Func]{Figure 5} shows how a ANN with a single hidden layer with 10 nodes was able to approximate the function without the same issues that Chebyshev polynomials had. The graph was created using the same ANN but trained 5 times and each time starting out with a different set of random initial parameters. This figure also shows a drawback of using ANN, which is that the quality of the approximation can depend on the initialization of the parameters. This can be seen with the fifth approximation. They also sometimes get stuck in local minimum and provide very bad approximations. \citet{ann_radial} showed that using different network structures such as a Radial Basis Function Network or a Wavelet Neural Network can improve the accuracy of ANN by reducing the frequency that the ANN gets stuck in a local minimum. \citet{ann_disc} show that ANN can approximate any discontinuous function with a single hidden layer and \citet{ann_herm} also show that the Hermite approximation problem can be solved using ANN.
 
 Using either Chebyshev polynomials or ANN to approximate a function allows for an accurate representation of a continuous function using a relatively small set of points. In the following algorithm these techniques will be used to approximate the value function of firm 1. By approximating the value function, it is possible to reduce the number of approximation nodes required to solve for an equilibrium.
 
@@ -378,12 +380,12 @@ Using either Chebyshev polynomials or ANN to approximate a function allows for a
   \caption{Pakes McGuire Algo with L-VFA}
   \begin{algorithmic}[1]
     \Procedure{}{} Choose $N$ approximation nodes $\{S_i\}_{i=1}^N$, error tolerance for value function updating $\epsilon$.
-    \State Initialize $\boldsymbol{b}$
+    \State Initialize $\boldsymbol{b}$, and $\{\mu^0_{i,-1}\}^N_{i=1}$.
     \While{$\norm{\hat{V}^{k}_1-\hat{V}^{k-1}_1} > \frac{\epsilon (1-\beta)}{2\beta}$}
     \For{$i=1,\dots,N$}
     \State Solve the Bellmann equation and store in memory $\hat{V}^k_{i,1}$ and $\mu^k_{i,1}$
     \begin{equation*}
-      v^k_{i,1}=\max_{\mu^k_{i,1} \in \Gamma(S_i)} \pi(S_i, \mu^k_{i,1}, \mu^{k-1}_{i,-1})+ \beta\mathbb{E}[\hat{V}(S';b)|S_i,\mu^k_{i,1},\mu^{k-1}_{i,-1})]
+      v^k_{i,1}=\max_{\mu^k_{i,1} \in \Gamma(S_i)} \pi(S_i, \mu^k_{i,1}, \mu^{k-1}_{i,-1})+ \beta\mathbb{E}[\hat{V}(S';\boldsymbol{b})|S_i,\mu^k_{i,1},\mu^{k-1}_{i,-1})]
     \end{equation*}
     \State Minimize the mean squared error and store in memory $\boldsymbol{b}$
     \begin{equation*}
@@ -396,11 +398,11 @@ Using either Chebyshev polynomials or ANN to approximate a function allows for a
   \end{algorithmic}
 \end{algorithm}
 
-This algorithm replaces the discretized value function with a continuous approximation. Since the value function can now be approximated by a continuous and differentiable function it is now possible to solve for an equilibrium of a model that uses a continuous state space. This is attractive feature since empirically the return from investment is continuously distributed, and since firms do not have a set of predetermined discrete levels of quality and so VFA allows for a more realistic theoretical model in addition to a more computationally efficient method for solving for an equilibrium.
+The Pakes McGuire algorithm with Lagrange value function approximation (L-VFA) replaces the discretized value function with a continuous approximation. Since the value function can now be approximated by a continuous and differentiable function it is now possible to solve for an equilibrium of a model that uses a continuous state space. This is attractive feature since empirically the return from investment is continuously distributed, and since firms do not have a set of predetermined discrete levels of quality and so VFA allows for a more realistic theoretical model in addition to a more computationally efficient method for solving for an equilibrium.
 
-Using the numerical example in this paper I compared the equilibrium found using two methods on six different grids of approximation nodes. The first method was using multidimensional Chebyshev polynomials to approximate the value function and the second method was a ANN with a single layer. When using the Chebyshev polynomials I used a grid based on the location Chebyshev nodes which are defined by $x_i=(z_i+1)(x_{max}-x_{min})/2+x_{min}$ and $z_i=-\text{cos}((2i-1)\pi/(2m))$ where $m$ is the number of approximation nodes per firm. When using the ANN I used an equidistant gird of $m$ points per firm. I examined the equilibrium value function and policy functions found when $m=6,12,\text{and }18$.
+Using the numerical example in this paper I compared the equilibrium found using two methods on six different grids of approximation nodes. The first method was using multidimensional Chebyshev polynomials to approximate the value function and the second method was a ANN with a single hidden layer. When using the Chebyshev polynomials I used a grid based on the location Chebyshev nodes which are defined by $x_i=(z_i+1)(x_{max}-x_{min})/2+x_{min}$ and $z_i=-\text{cos}((2i-1)\pi/(2m))$ where $m$ is the number of approximation nodes per firm. When using the ANN I used an equidistant gird of $m$ points per firm. I examined the equilibrium value function and policy functions found when $m=6,12,\text{and }18$.
 
-The results show that the ANN was able to approximate the value function to a high enough degree of accuracy that the equilibrium policy functions maintained their qualitative structure when $m=6,12,\text{and }18$. The multidimensional Chebyshev approximation was able to preserve the policy function's qualitative structure when $m=12, \text{and } 18$ however, when $m=6$ the value function failed to converge. The approximation failed to converge because when the value function increases very quickly when firm 2's state is at a low value of about 3 and firm 1's state is between 3 and 6. This large rate of increase leads the approximation to exhibit the Gibbs Phenomenon which can be seen in \hyperref[gibbslittle]{Figure \ref{gibbslittle}} and more prominently in  \hyperref[gibbsmore]{Figure \ref{gibbsmore}} \footnote{\href{https://github.com/wmjones/VFA-for-dynamic-games}{My Github Repository} has the source code, an easy to use makefile, and animated gifs of each of the 6 examples where each frame of the gif is a value function iteration.}. This is especially an issue because during the value function iterations the region that was overshot is reinforced and the approximation error propagates through the subsequent value function iterations.
+The results show that the ANN was able to approximate the value function to a high enough degree of accuracy that the equilibrium policy functions maintained their qualitative structure when $m=6,12,\text{and }18$. The multidimensional Chebyshev approximation was able to preserve the policy function's qualitative structure when $m=12, \text{and } 18$ however, when $m=6$ the value function failed to converge. The approximation failed to converge because when the value function increases very quickly when firm 2's state is at a low value of about 3 and firm 1's state is between 3 and 6. This large rate of increase leads the approximation to exhibit the Gibbs Phenomenon which can be seen in \hyperref[gibbslittle]{Figure \ref{gibbslittle}} and more prominently in  \hyperref[gibbsmore]{Figure \ref{gibbsmore}} \footnote{\href{https://github.com/wmjones/VFA-for-dynamic-games}{My Github Repository} has the animated gifs of each of the 6 examples where each frame of the gif is a value function iteration, source code, and an easy to use makefile.}. This is especially an issue because during the value function iterations the region that was overshot is reinforced and the approximation error propagates through the subsequent value function iterations.
 
 These results suggest that ANN are able to approximate the value function to a higher degree of accuracy than Chebyshev polynomials when the number of approximation nodes is reduced. This is useful since if Chebyshev polynomials can approximate it with a sufficient degree of accuracy when $m=12$ and ANN can approximate the value function with a sufficient degree of accuracy when $m=6$, then with 10 firms VFA with Chebyshev polynomials is approximately 60 times faster than a method that uses $m=18$ and VFA with ANN is approximately 60,000 times faster than a method that uses $m=18$.
 
@@ -410,7 +412,7 @@ It is also easy to incorporate other methods to reduce the size of the state spa
 \begin{equation*}
   V(\omega_1,\omega_2,\dots,\omega_N)=V(\omega_1,\omega_{\pi(2)},\dots,\omega_{\pi(n)})
 \end{equation*}
-for any $n-1$ dimensional vector $\pi=[\pi(2),\dots,\pi(n)]$ which is a permutation of $(2,\dots,n)$. Therefore, the value function does not need to be evaluated at each distinct approximation node but instead only needs to be evaluated at the nodes where $\omega_2\geq \omega_3,\dots,\geq \omega_n$. This causes the number of approximation nodes in the state space to be calculated as $\frac{(m+n-1)!}{(m-1)!n!}$ instead of $m^n$. For 10 firms and $m=18$ this leads to $N=8,436,285$, when $m=12$ this leads to $N=352,716$ and when $m=6$ this leads to $N=3,003$. Thus if it takes approximately 0.01 seconds to evaluate the function $f$, it will now only take 23.4 hours to do one value function iteration when $m=18$, 0.98 hours to do one value function iteration when $m=12$ and only 0.008 hours to do one value function iteration when $m=6$. This reduction in computation time allows for the exploration of richer models with larger state spaces which were previously unable to be analyzed due to computational constraints.
+for any $n-1$ dimensional vector $\pi=[\pi(2),\dots,\pi(n)]$ which is a permutation of $(2,\dots,n)$. Therefore, the value function does not need to be evaluated at each distinct approximation node but instead only needs to be evaluated at the nodes where $\omega_2\geq \omega_3,\dots,\geq \omega_n$. This causes the number of approximation nodes in the state space to be calculated as $\frac{(m+n-1)!}{(m-1)!n!}$ instead of $m^n$. For 10 firms and $m=18$ this leads to $N=8,436,285$, when $m=12$ this leads to $N=352,716$ and when $m=6$ this leads to $N=3,003$. Thus if it takes approximately 0.01 seconds to evaluate the function $f$, it will now only take 23.4 hours to evaluate the function $f(S,\mu)$ once in each state when $m=18$, 0.98 hours to it when $m=12$ and only 0.008 hours to do it when $m=6$. This reduction in computation time allows for the exploration of richer models with larger state spaces which were previously unable to be analyzed due to computational constraints.
 
 Similar to how the approximation accuracy of one dimensional functions can be improved by fitting Hermite data rather than Lagrange data, the value function can be approximated using Hermite data. \citet{2015_Judd_Cai} discuss a method for easily obtaining the gradient of the value function in order use Hermite data to approximate the value function. \citet{2015_Judd_Cai} showed that Hermite value function approximation (H-VFA), was able to either produce a higher accuracy in a given amount of time or attain the same accuracy with much less computation time when compared to L-VFA.
 
@@ -450,27 +452,27 @@ Then the gradient of $H(S)$ is provided by
 \end{equation*}
 where $\tau^*_j(S)$ is the Lagrange multiplier for the constraints $S_j-y_j=0$.
 
-There are several derivative-free constrained optimization software libraries that provide along with the solution to the maximization problem the Lagrange multiplier for each constraint. This method allows for an easy method to obtain the gradient of the value function and thus able to use the Hermite data, $\{S_i,v_i,d_i\}_{i=1}^N$, where $d_i$ is the gradient vector evaluated at $S_i$, to approximate the value function.
+There are several derivative-free constrained optimization software libraries that provide along with the solution to the maximization problem the Lagrange multiplier for each constraint such as MATLAB's fmincon function. This method allows for an easy method to obtain the gradient of the value function and thus able to use the Hermite data, $\{S_i,v_i,d_i\}_{i=1}^N$, where $d_i$ is the gradient vector evaluated at $S_i$, to approximate the value function.
 
 The coefficients to approximate the value function using multidimensional Chebyshev polynomials are obtained by solving the following equation and the notation for multidimensional Chebyshev polynomials is presented in \hyperref[multicheb]{Appendix 2}.
 
 \begin{equation*}
-  \min_b \Bigg \{\sum_{i=1}^N \bigg (v_i-\sum_{0\leq |\alpha|\leq r}b_\alpha T_\alpha(S_i) \bigg )^2+\sum_{i=1}^N \sum_{j=1}^{n} \bigg ( d_{i,j} - \sum_{0\leq |\alpha|\leq r}b_\alpha \frac{\partial}{\partial S_j}T_\alpha(S_i) \bigg )^2 \Bigg \}
+  \min_{\boldsymbol{b}} \Bigg \{\sum_{i=1}^N \bigg (v_i-\sum_{0\leq |\alpha|\leq r}b_\alpha T_\alpha(S_i) \bigg )^2+\sum_{i=1}^N \sum_{j=1}^{n} \bigg ( d_{i,j} - \sum_{0\leq |\alpha|\leq r}b_\alpha \frac{\partial}{\partial S_j}T_\alpha(S_i) \bigg )^2 \Bigg \}
 \end{equation*}
 
-While the L-VFA algorithm presented in \citet{2015_Judd_Cai} is easily added to the Pakes McGuire Algorithm, the H-VFA algorithm is not directly applicable. A direct adaptation of H-VFI for the Pakes McGuire Algorithm would be
+While the L-VFA algorithm presented in \citet{2015_Judd_Cai} is easily added to the Pakes McGuire Algorithm, a direct adaptation of the H-VFA algorithm has additional complications.
 
 \begin{algorithm}[H]
   \caption{Pakes McGuire Algo with H-VFA using Chebyshev Polynomials}
   \begin{algorithmic}[1]
     \Procedure{}{} Choose $N$ approximation nodes $\{S_i\}_{i=1}^N$, error tolerance for value function updating $\epsilon$.
-    \State Initialize $\boldsymbol{b}$
+    \State Initialize $\boldsymbol{b}$, and $\{\mu^0_{i,-1}\}_{i=1}^N$.
     \While{$\norm{\hat{V}^{k}_1-\hat{V}^{k-1}_1} > \frac{\epsilon (1-\beta)}{2\beta}$}
     \For{$i=1,\dots,N$}
     \State Obtain the value function at $S_i$, and gradient by solving Equation \eqref{equationA} or Equation \eqref{equationB}. Then store in memory $v^k_{i,1}$, $\mu^k_{i,1}$, and $d_{i}^k$.
-    \State Minimize the mean squared error and store in memory $b$ using Hermite data $\{S_i,v_{i,1},d_{i,1}\}_{i=1}^N$ by solving
+    \State Minimize the mean squared error and store in memory $\boldsymbol{b}$ using Hermite data $\{S_i,v_{i,1},d_{i,1}\}_{i=1}^N$ by solving
 \begin{equation*}
-  \min_{\boldsymbol{b}} \Bigg \{\sum_{i=1}^N \bigg (v_i-\sum_{0\leq |\alpha|\leq r}\boldsymbol{b}_\alpha T_\alpha(S_i) \bigg )^2+\sum_{i=1}^N \sum_{j=1}^{n} \bigg ( d_{i,j} - \sum_{0\leq |\alpha|\leq r}\boldsymbol{b}_\alpha \frac{\partial}{\partial S_j}T_\alpha(S_i) \bigg )^2 \Bigg \}
+  \min_{\boldsymbol{b}} \Bigg \{\sum_{i=1}^N \bigg (v_i-\sum_{0\leq |\alpha|\leq r}b_\alpha T_\alpha(S_i) \bigg )^2+\sum_{i=1}^N \sum_{j=1}^{n} \bigg ( d_{i,j} - \sum_{0\leq |\alpha|\leq r}b_\alpha \frac{\partial}{\partial S_j}T_\alpha(S_i) \bigg )^2 \Bigg \}
 \end{equation*}
     \State Let $k=k+1$
     \EndFor
@@ -479,9 +481,9 @@ While the L-VFA algorithm presented in \citet{2015_Judd_Cai} is easily added to 
   \end{algorithmic}
 \end{algorithm}
 
-Step 5: in this algorithm causes complications. Since the reaction of other firms is taken into account a firm's decision the gradient calculation using \eqref{equationA} would require the calculation of the gradient of the policy function. This is because the policy that the other firms choose depends on what the industry's state is. Thus in order complete Step 5: using Equation \eqref{equationA} it is necessary to determine the gradient of the policy function. Since the analytical gradient of the policy function cannot be obtained it is necessary to numerically approximate the gradient. This can be done easily with the central difference method. The accuracy of the central difference method is limited by the step size which in this context is the distance between two approximation nodes. Thus in order to obtain an accurate approximation of the policy function there would need to be more approximation nodes which prevents H-VFA from decreasing the number of approximation nodes.
+Step 5: in this algorithm causes complications. Since the reaction of other firms is taken into account a firm's decision the gradient calculation using \hyperref[equationA]{(\ref{equationA})} would require the calculation of the gradient of the policy function. This is because the policy that the other firms choose depends on what the industry's state is. Thus in order complete Step 5: using Equation \hyperref[equationA]{(\ref{equationA})} it is necessary to determine the gradient of the policy function. Since the analytical gradient of the policy function cannot be obtained it is necessary to numerically approximate the gradient. This can be done easily with the central difference method however, the accuracy of the central difference method is limited by the step size which in this context is the distance between two approximation nodes. Thus in order to obtain an accurate approximation of the policy function there would need to be more approximation nodes which prevents H-VFA from decreasing the number of approximation nodes. This also prevents the use of more efficient optimization methods such as the L-BFGS algorithm.
 
-If Step 5: is calculated using \eqref{equationB} then there can be an issue with the numerical optimization method converging. This is due to the fact that a derivative free algorithm is used to calculate the solution and that by adding in an additional decision variable $y$ the number of function evaluations required to find the optimal action will grow significantly. Therefore the computational cost of finding the optimal action may cause the Pakes Mcguire Algorithm with H-VFA to be slower than Pakes Mcguire Algorithm with L-VFA.
+If Step 5: is calculated using \eqref{equationB} then there can be an issue with the numerical optimization method converging. This is due to the fact that a derivative free algorithm is used to calculate the solution and that by adding in an additional $n$ decision variables $\{y\}_{j=1}^n$ the number of function evaluations required to find the optimal action will grow significantly. Therefore the computational cost of finding the optimal action may cause the Pakes Mcguire Algorithm with H-VFA to be slower than Pakes Mcguire Algorithm with L-VFA.
 
 % section 5 prop 3 of 1994_Pakes_McGuire show that approx with symmetry leads to constant state space size
 
@@ -506,40 +508,40 @@ In each plot the top row is the value function, the middle row is the policy fun
 
 \begin{figure}[H]
   \centering
-  \makebox[\textwidth]{\includegraphics[width=\paperwidth]{plot_cai_18_12_eqm}}
-  \caption{The equilibrium value, investment policy and pricing policy fit on an 18x18 grid with 12 degree multidimensional Chebyshev polynomials}
+  \makebox[\textwidth]{\includegraphics[width=\textwidth]{plot_cai_18_12_eqm}}
+  \caption{The equilibrium value, investment policy and pricing policy fit on an 18x18 grid with 12 degree multidimensional Chebyshev polynomials. \href{https://github.com/wmjones/VFA-for-dynamic-games/blob/master/gif_cai_18_12.gif}{Link to animated gif version}}
 \end{figure}
 
 \begin{figure}[H]
   \centering
-  \makebox[\textwidth]{\includegraphics[width=\paperwidth]{plot_cai_12_12_eqm}}
-  \caption{The equilibrium value, investment policy and pricing policy fit on an 12x12 grid with 12 degree multidimensional Chebyshev polynomials}
+  \makebox[\textwidth]{\includegraphics[width=\textwidth]{plot_cai_12_12_eqm}}
+  \caption{The equilibrium value, investment policy and pricing policy fit on an 12x12 grid with 12 degree multidimensional Chebyshev polynomials. \href{https://github.com/wmjones/VFA-for-dynamic-games/blob/master/gif_cai_12_12.gif}{Link to animated gif version}}
   \label{gibbslittle}
 \end{figure}
 
 \begin{figure}[H]
   \centering
-  \makebox[\textwidth]{\includegraphics[width=\paperwidth]{plot_cai_6_6_eqm}}
-  \caption{The equilibrium value, investment policy and pricing policy fit on an 6x6 grid with 6 degree multidimensional Chebyshev polynomials}
+  \makebox[\textwidth]{\includegraphics[width=\textwidth]{plot_cai_6_6_eqm}}
+  \caption{The equilibrium value, investment policy and pricing policy fit on an 6x6 grid with 6 degree multidimensional Chebyshev polynomials. \href{https://github.com/wmjones/VFA-for-dynamic-games/blob/master/gif_cai_6_6.gif}{Link to animated gif version}}
   \label{gibbsmore}
 \end{figure}
 
 \begin{figure}[H]
   \centering
-  \makebox[\textwidth]{\includegraphics[width=\paperwidth]{plot_ann_18_eqm}}
-  \caption{The equilibrium value, investment policy and pricing policy fit on an 18x18 grid using a neural net with a single fully connected layer with 324 nodes and tanh activation function}
+  \makebox[\textwidth]{\includegraphics[width=\textwidth]{plot_ann_18_eqm}}
+  \caption{The equilibrium value, investment policy and pricing policy fit on an 18x18 grid using a neural net with a single fully connected layer with 324 nodes and tanh activation function. \href{https://github.com/wmjones/VFA-for-dynamic-games/blob/master/gif_ann_18.gif}{Link to animated gif version}}
 \end{figure}
 
 \begin{figure}[H]
   \centering
-  \makebox[\textwidth]{\includegraphics[width=\paperwidth]{plot_ann_12_eqm}}
-  \caption{The equilibrium value, investment policy and pricing policy fit on an 12x12 grid using a neural net with a single fully connected layer with 144 nodes and tanh activation function}
+  \makebox[\textwidth]{\includegraphics[width=\textwidth]{plot_ann_12_eqm}}
+  \caption{The equilibrium value, investment policy and pricing policy fit on an 12x12 grid using a neural net with a single fully connected layer with 144 nodes and tanh activation function. \href{https://github.com/wmjones/VFA-for-dynamic-games/blob/master/gif_ann_12.gif}{Link to animated gif version}}
 \end{figure}
 
 \begin{figure}[H]
   \centering
-  \makebox[\textwidth]{\includegraphics[width=\paperwidth]{plot_ann_6_eqm}}
-  \caption{The equilibrium value, investment policy and pricing policy fit on an 6x6 grid using a neural net with a single fully connected layer with 144 nodes and tanh activation function}
+  \makebox[\textwidth]{\includegraphics[width=\textwidth]{plot_ann_6_eqm}}
+  \caption{The equilibrium value, investment policy and pricing policy fit on an 6x6 grid using a neural net with a single fully connected layer with 144 nodes and tanh activation function. \href{https://github.com/wmjones/VFA-for-dynamic-games/blob/master/gif_ann_6.gif}{Link to animated gif version}}
 \end{figure}
 
 \section*{Appendix 2: Multidimensional complete Chebyshev polynomial approximation}

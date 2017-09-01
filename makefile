@@ -43,18 +43,27 @@ plot : model_data.csv
 gif :
 	convert -set delay '%[fx:t==0 ? 30 : 40 - t/(n-1)]' -loop 0 figs/%d_plot.jpeg[1-301] plots.gif
 
-pdf : draft2.tex 		#should make dependent on figures
+pdf : final.tex 		#should make dependent on figures
 	cd latex;\
 	ls;\
-	pdflatex draft2;\
-	bibtex draft2;\
-	pdflatex draft2;\
-	pdflatex draft2;\
+	pdflatex final;\
+	bibtex final;\
+	pdflatex final;\
+	pdflatex final;\
 	cd ../;
 
-view : draft2.pdf
+pdfclean :
 	cd latex;\
-	open draft2.pdf;\
+	rm *.bbl;\
+	rm *.blg;\
+	rm *.log;\
+	rm *.out;\
+	rm *.aux;\
+	cd ../;
+
+view : final.pdf
+	cd latex;\
+	open final.pdf;\
 	cd ../;
 
 clean :
