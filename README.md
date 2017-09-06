@@ -10,7 +10,7 @@ binaries=(
     cmake
     openblas --with-openmp
     nlopt
-    dlib --cc=gcc-7
+    dlib --cc=gcc-7 --with-openblas
 )
 brew install ${binaries[@]}
 ```
