@@ -7,7 +7,7 @@ all : figs/plots.gif figs/%.jpg plot_ANN_Ind_Func.png plot_g.png
 figs/plots.gif : figs/%.jpg
 	convert -set delay '%[fx:t==0 ? 30 : 40 - t/(n-1)]' -loop 0 figs/%d_plot.jpeg[1-301] plots.gif
 
-figs/%.jpg : model_data.csv plotting.r		# not sure why this runs if all images already created
+figs/%.jpg : model_data.csv plotting.r
 	Rscript src/plotting.r
 
 plot_ANN_Ind_Func.png : plotting_ANN_Ind_Func.r
@@ -43,7 +43,7 @@ plot : model_data.csv
 gif :
 	convert -set delay '%[fx:t==0 ? 30 : 40 - t/(n-1)]' -loop 0 figs/%d_plot.jpeg[1-301] plots.gif
 
-pdf : final.tex 		#should make dependent on figures
+pdf : final.tex
 	cd latex;\
 	ls;\
 	pdflatex final;\

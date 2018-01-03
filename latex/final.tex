@@ -5,7 +5,7 @@
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 \usepackage{graphicx}
-\graphicspath{{../}}
+\graphicspath{{../figs/}}
 \pdfimageresolution=300
 
 \usepackage{accents}
@@ -19,7 +19,7 @@
 \usepackage{mathtools}
 \DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
 
-\usepackage[colorlinks]{hyperref}
+\usepackage{hyperref}
 \hypersetup{
   colorlinks = true,
   allcolors = blue
@@ -127,7 +127,7 @@ While these assumptions limit the frameworks ability to generate the variation o
 Firm j's value function when in industry state $S$ will be expressed by
 
 \begin{equation*}
-  V_j(S)=\max_{\mu_j \in \Gamma(S)} \pi(S, \mu_j, \mu_{-j}) + \beta\mathbb{E}[V(S')|S,\mu_{j},\mu_{-j})]
+  V_j(S)=\max_{\mu_j \in \Gamma(S)} \{\pi(S, \mu_j, \mu_{-j}) + \beta\mathbb{E}[V_j(S')|S,\mu_{j},\mu_{-j})]\}
 \end{equation*}
 
 where $\mu_j$ is the policy of firm j which will could include the pricing, investment, and entry or exit decision, $\Gamma(S)$ is the set of feasible actions in state $S$, $\mu_{-j}$ is a vector containing the policies of all other firms other than firm j, and $S'$ is the state transitioned to conditional on $S,\mu_{j}$ and $\mu_{-j}$.
@@ -249,7 +249,7 @@ In many applications the run time required to compute an equilibrium determines 
 
 Thus in order to develop richer models of industry dynamics that are a closer representation of reality, it is important to understand the factors that determine a models run time and the methods that can be used to make a model computationally tractable.
 
-\section{Avoiding the curse of dimensionality in action space}
+\section{Avoiding the curse of dimensionality in the action space}
 \label{action}
 
 In order to reduce the computational cost caused by a curse of dimensionality in the action space it is necessary to either reduce the number of decision variables, or reduce the number of function evaluations required to find the policy that maximizes the objective. In the \citet{1995_Erickson_Pakes_RES} framework it is common to use a static-dynamic breakdown to reduce the number of decision variables. A static-dynamic breakdown means that the model is constructed in such a way that in the dynamic industry it is optimal for firms to choose the same prices that they would choose in a single period model. If this is the case then the profitability for firm 1 in each state only has to be computed once and then stored in memory. In some settings it is not desirable to use a static-dynamic breakdown since the pricing decision does influence the dynamics of the industry. This is the case in dynamic network industries where the price of a product in a period t affects the market share for each firm in t+1 \citep{2009_Chen_Doraszelski_Harrington, 2006_Mitchell_Skrzypacz, 2006_Chen_Doraszelski}.
@@ -323,7 +323,7 @@ When interpolating a function with Chebyshev polynomials it is important to choo
   \min_{\boldsymbol{b}}\sum_{i=1}^N (\hat{V}(S_i;\boldsymbol{b})-v_i)^2
 \end{equation*}
 
-This problem can be solved easily with OLS or with the closed form Chebyshev Approximation Formula. This approximation method has a few cases where it performs poorly. One case where the approximation is poor is when $N$ is too small. For a fixed $N$ the approximation can be improved by fittiting the polynomial approximation using Hermite data. Hermite data consists of the approximation node, the function evaluated at the approximation node and also the gradient of the function evaluated at the approximation node. In order to fit the Chebyshev polynomial using Hermite data, $\{S_i,v_i,d_i\}_{i=1}^N$, where $d_i=\frac{d v(S_i)}{d S}$, the coefficients are found by solving the following OLS problem.
+This problem can be solved easily with OLS or with the closed form Chebyshev Approximation Formula. This approximation method has a few cases where it performs poorly. One case where the approximation is poor is when $N$ is too small. For a fixed $N$ the approximation can be improved by fitting the polynomial approximation using Hermite data. Hermite data consists of the approximation node, the function evaluated at the approximation node and also the gradient of the function evaluated at the approximation node. In order to fit the Chebyshev polynomial using Hermite data, $\{S_i,v_i,d_i\}_{i=1}^N$, where $d_i=\frac{d v(S_i)}{d S}$, the coefficients are found by solving the following OLS problem.
 
 \begin{equation*}
   \min_{\boldsymbol{b}} \sum_{i=1}^N\bigg((\hat{V}(S_i;\boldsymbol{b})-v_i)^2 + (\frac{\partial \hat{V}(S_i;\boldsymbol{b})}{\partial S} - d_i)^2 \bigg)

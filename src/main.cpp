@@ -10,11 +10,12 @@
 #include <omp.h>
 #include <stdio.h>
 
+
 using namespace std;
 ofstream myfile;
 
 void bellman(double **xy_knots, double *value, double *value_last, double *policy, double *policy_last, double *price, double *price_last, double *dvalue0, double *dvalue1, size_t nmax){
-#pragma omp parallel for
+    #pragma omp parallel for // private(i)
     for(size_t i=0; i<S; i++){
 	// printf("Optimization[%zd]\n", i);
 	// printf("state = (%f, %f)\n", xy_knots[i][0], xy_knots[i][1]);
@@ -28,7 +29,7 @@ void bellman(double **xy_knots, double *value, double *value_last, double *polic
 //            double state_x[2] = {xy_knots[i][0] + h, xy_knots[i][1]};
 //            double state_y[2] = {xy_knots[i][0], xy_knots[i][1] + h};
 //            vector<double> grad(2);
-//            vector<double> actions(2);
+//            vector<double> actions(2);brew
 //            actions[0] = 6;
 //            actions[1] = 0;
 //            vector<double> actions_x(2);

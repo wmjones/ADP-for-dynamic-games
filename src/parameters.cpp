@@ -39,7 +39,7 @@ const size_t choose(size_t n, size_t k){
 }
 
 __attribute__((constructor)) void initialize(){
-    approx_type = 1;		// cheb==0 cai==1 ann==2
+    approx_type = 2;		// cheb==0 cai==1 ann==2
     d = 2;
     Nmax = 300;
     num_of_knots = 18;

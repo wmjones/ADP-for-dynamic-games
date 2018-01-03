@@ -1,3 +1,6 @@
+library(foreach)
+library(doParallel)
+
 path <- ""
 data <- read.csv(paste(path, "model_data.csv", sep=""), header=TRUE)
 
@@ -15,7 +18,6 @@ mat3 <- matrix(c(-1, 0, 0, 0,
                0, -.4, .9, 0,
                0, .9, .4, 0,
                0, 0, 0, 1), nrow=4, ncol=4, byrow=TRUE)
-
 
 col <-  rainbow(100)
 color_pallet <- function(x){
@@ -41,8 +43,6 @@ inv.max <- max(tmp$inv)
 p.min <- min(tmp$p)-.0001
 p.max <- max(tmp$p)+.0001
 
-library(foreach)
-library(doParallel)
 cores=detectCores()
 cl <- makeCluster(cores[1]-1) #not to overload your computer
 registerDoParallel(cl)
